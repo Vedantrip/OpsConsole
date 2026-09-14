@@ -4,7 +4,11 @@ import { buildFullIntelligence } from "@/lib/instagram-intelligence";
 
 const APIFY_BASE = "https://api.apify.com/v2";
 const DEFAULT_REELS_LIMIT = Number(process.env.DEFAULT_REELS_LIMIT || 12);
-const DEFAULT_ACTOR_ID = process.env.APIFY_ACTOR_ID || "apify~instagram-reel-scraper";
+const CONFIGURED_ACTOR_ID = process.env.APIFY_ACTOR_ID;
+const DEFAULT_ACTOR_ID =
+  process.env.APIFY_REEL_ACTOR_ID ||
+  (CONFIGURED_ACTOR_ID?.startsWith("hypebridge~") ? "apify~instagram-reel-scraper" : CONFIGURED_ACTOR_ID) ||
+  "apify~instagram-reel-scraper";
 
 type RawReel = {
   shortCode?: string;
