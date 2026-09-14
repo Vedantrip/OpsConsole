@@ -65,12 +65,12 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         </Link>
 
         {/* Hero Banner */}
-        <div className="card p-6 bg-panel/80">
+        <div className="card p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-mono text-lift uppercase tracking-wider mb-1">Brand: {campaign.brand.name}</div>
+              <div className="text-xs font-mono text-gold uppercase tracking-wider mb-1">Brand: {campaign.brand.name}</div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-display font-bold tracking-tight text-paper">{campaign.name}</h1>
+                <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">{campaign.name}</h1>
                 {role === "ADMIN" && <CampaignHeader
                   campaign={{
                     id: campaign.id,
@@ -84,29 +84,29 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
                 />}
               </div>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-mono bg-lift/10 text-lift border border-lift/20 w-fit">
+            <span className="px-3 py-1 rounded-full text-xs font-mono bg-gold/10 text-gold border border-gold/20 w-fit">
               Status: {campaign.status}
             </span>
           </div>
 
           {(campaign.startDate || campaign.endDate) && <div className="flex flex-wrap gap-x-5 gap-y-1 mt-4 pt-4 border-t border-line text-xs font-mono text-muted">
-            {campaign.startDate && <span>Starts: <strong className="text-paper">{campaign.startDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</strong></span>}
-            {campaign.endDate && <span>Brand due: <strong className="text-lift">{campaign.endDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</strong></span>}
+            {campaign.startDate && <span>Starts: <strong className="text-ink">{campaign.startDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</strong></span>}
+            {campaign.endDate && <span>Brand due: <strong className="text-gold">{campaign.endDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</strong></span>}
           </div>}
 
           {showMoney && (
             <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-line">
               <div>
                 <div className="text-xs text-muted font-medium mb-0.5">Campaign Budget</div>
-                <div className="text-xl font-display font-semibold text-lift">{money(Number(campaign.budget))}</div>
+                <div className="text-xl font-display font-semibold text-gold stat-number">{money(Number(campaign.budget))}</div>
               </div>
               <div>
                 <div className="text-xs text-muted font-medium mb-0.5">Payouts Committed</div>
-                <div className="text-xl font-display font-semibold text-lift">{money(totalPayouts)}</div>
+                <div className="text-xl font-display font-semibold text-gold stat-number">{money(totalPayouts)}</div>
               </div>
               <div>
                 <div className="text-xs text-muted font-medium mb-0.5">Profit</div>
-                <div className={`text-xl font-display font-semibold ${profit >= 0 ? "text-lift" : "text-amber"}`}>
+                <div className={`text-xl font-display font-semibold stat-number ${profit >= 0 ? "text-gold" : "text-viz-rose"}`}>
                   {money(profit)}
                 </div>
               </div>
@@ -116,15 +116,15 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
           {!showMoney && (
             <div className="mt-6 pt-4 border-t border-line">
               <div className="text-xs text-muted font-medium mb-0.5">Deliverables Count</div>
-              <div className="text-xl font-display font-semibold text-paper">{campaign.deliverables.length}</div>
+              <div className="text-xl font-display font-semibold text-ink">{campaign.deliverables.length}</div>
             </div>
           )}
         </div>
       </div>
 
-      {role === "ADMIN" && <section className="glass-card p-5 sm:p-6">
+      {role === "ADMIN" && <section className="card p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <div><p className="eyebrow">Campaign finance</p><h2 className="text-lg font-display font-semibold">Invoice the brand</h2></div>
+          <div><p className="eyebrow">Campaign finance</p><h2 className="text-base font-display font-semibold text-ink">Invoice the brand</h2></div>
           <span className="text-xs text-muted font-mono">{campaign.invoices.length} invoice{campaign.invoices.length === 1 ? "" : "s"} · {money(totalInvoiced)} invoiced</span>
         </div>
         <form action={createInvoice.bind(null, campaign.brandId, campaign.id)} className="flex flex-col sm:flex-row gap-3">
@@ -149,9 +149,9 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             campaign.deliverables.map((d) => (
               <div key={d.id} className="table-row flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 text-sm group">
                 <div>
-                  <div className="font-medium text-paper flex items-center gap-2">
+                  <div className="font-medium text-ink flex items-center gap-2">
                     <span>{d.creator.name}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper/10 text-paper border border-paper/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper text-muted border border-line">
                       {d.type}
                     </span>
                   </div>

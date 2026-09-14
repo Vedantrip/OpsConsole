@@ -24,8 +24,8 @@ export default async function InsightsPage() {
         <p className="text-sm text-muted">
           Creator intelligence from public Instagram reel performance signals.
         </p>
-        <div className="mt-3 max-w-3xl rounded-xl border border-lift/20 bg-lift/8 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
-          <span className="font-semibold text-paper">Public performance data.</span>{" "}
+        <div className="mt-3 max-w-3xl rounded-xl border border-gold/20 bg-gold/5 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
+          <span className="font-semibold text-ink">Public performance data.</span>{" "}
           Metrics are calculated from recent public reels through Apify. This is not official Instagram Insights or authenticated audience data.
         </div>
       </div>

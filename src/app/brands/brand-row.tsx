@@ -44,11 +44,11 @@ export default function BrandRow({ brand, canManage }: { brand: Brand; canManage
   return (
     <div className="table-row flex items-center justify-between px-5 py-3.5 text-sm group">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-paper/10 border border-paper/20 text-paper flex items-center justify-center font-display font-bold text-xs uppercase">
+        <div className="w-8 h-8 rounded-full bg-paper border border-line text-ink flex items-center justify-center font-display font-semibold text-xs uppercase">
           {brand.name.charAt(0)}
         </div>
         <div>
-          <div className="font-medium text-paper group-hover:text-lift transition-colors">
+          <div className="font-medium text-ink group-hover:text-gold transition-colors">
             {brand.name}
           </div>
           <div className="text-muted text-xs flex items-center gap-2 mt-0.5 font-mono">
@@ -64,7 +64,7 @@ export default function BrandRow({ brand, canManage }: { brand: Brand; canManage
       </div>
 
       <div className="flex items-center gap-4">
-        <span className="px-2.5 py-1 rounded-full text-xs font-mono bg-panel text-muted border border-line">
+        <span className="px-2.5 py-1 rounded-full text-xs font-mono bg-paper text-muted border border-line">
           {brand._count.campaigns} campaign{brand._count.campaigns === 1 ? "" : "s"}
         </span>
 

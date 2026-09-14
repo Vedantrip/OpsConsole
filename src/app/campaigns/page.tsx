@@ -14,11 +14,11 @@ function money(n: number) {
 
 function statusPill(status: CampaignStatus) {
   switch (status) {
-    case "ACTIVE": return "bg-lift/15 text-lift border-lift/30";
-    case "PLANNING": return "bg-paper/10 text-paper border-paper/20";
-    case "COMPLETE": return "bg-lift/25 text-lift border-lift/40";
-    case "CANCELLED": return "bg-amber/15 text-amber border-amber/30";
-    default: return "bg-panel text-muted border-line";
+    case "ACTIVE": return "bg-gold/10 text-gold border-gold/30";
+    case "PLANNING": return "bg-paper text-ink border-line";
+    case "COMPLETE": return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+    case "CANCELLED": return "bg-viz-rose/10 text-viz-rose border-viz-rose/30";
+    default: return "bg-paper text-muted border-line";
   }
 }
 
