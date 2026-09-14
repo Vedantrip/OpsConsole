@@ -4,11 +4,14 @@ import { buildFullIntelligence } from "@/lib/instagram-intelligence";
 
 const APIFY_BASE = "https://api.apify.com/v2";
 const DEFAULT_REELS_LIMIT = Number(process.env.DEFAULT_REELS_LIMIT || 12);
-const CONFIGURED_ACTOR_ID = process.env.APIFY_ACTOR_ID;
+const CONFIGURED_REEL_ACTOR_ID = process.env.APIFY_REEL_ACTOR_ID;
+const LEGACY_ACTOR_ID = process.env.APIFY_ACTOR_ID;
 const DEFAULT_ACTOR_ID =
-  process.env.APIFY_REEL_ACTOR_ID ||
-  (CONFIGURED_ACTOR_ID?.startsWith("hypebridge~") ? "apify~instagram-reel-scraper" : CONFIGURED_ACTOR_ID) ||
-  "apify~instagram-reel-scraper";
+  CONFIGURED_REEL_ACTOR_ID && !CONFIGURED_REEL_ACTOR_ID.startsWith("hypebridge~")
+    ? CONFIGURED_REEL_ACTOR_ID
+    : LEGACY_ACTOR_ID && !LEGACY_ACTOR_ID.startsWith("hypebridge~")
+      ? LEGACY_ACTOR_ID
+      : "apify~instagram-reel-scraper";
 
 type RawReel = {
   shortCode?: string;
@@ -107,13 +110,7 @@ export async function fetchReelsForUsername(username: string, limit = DEFAULT_RE
   if (!cleanUsername) throw new Error("Instagram handle cannot be empty.");
 
   const actorId = DEFAULT_ACTOR_ID;
-  const input = actorId.includes("instagram-reel-scraper")
-    ? { username: [cleanUsername], resultsLimit: limit }
-    : {
-        directUrls: [`https://www.instagram.com/${cleanUsername}/`],
-        resultsType: "reels",
-        resultsLimit: limit,
-      };
+  const input = { username: [cleanUsername], resultsLimit: limit };
 
   const response = await fetch(`${APIFY_BASE}/acts/${actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(token)}`, {
     method: "POST",
@@ -124,7 +121,7 @@ export async function fetchReelsForUsername(username: string, limit = DEFAULT_RE
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = data?.error?.message || response.statusText || "Unknown Apify error";
+    const message = data?.error?.message || data?.message || response.statusText || "Unknown Apify error";
     throw new Error(`Apify request failed (${response.status}): ${message}`);
   }
   if (!Array.isArray(data)) throw new Error("Unexpected response shape from Apify actor");
@@ -156,10 +153,7 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
   const validEngagementRates = perReel.map((reel) => reel.engagementRate).filter((value): value is number => value !== null);
   const averageViews = mean(validViews);
   const coefficientOfVariation = averageViews > 0 ? standardDeviation(validViews) / averageViews : null;
-  const timestamps = perReel
-    .map((reel) => (reel.timestamp ? new Date(reel.timestamp).getTime() : null))
-    .filter((value): value is number => value !== null && Number.isFinite(value))
-    .sort((a, b) => a - b);
+  const timestamps = perReel.map((reel) => (reel.timestamp ? new Date(reel.timestamp).getTime() : null)).filter((value): value is number => value !== null && Number.isFinite(value)).sort((a, b) => a - b);
   const gaps = timestamps.slice(1).map((timestamp, index) => (timestamp - timestamps[index]) / 86_400_000);
   const averageDaysBetweenPosts = gaps.length ? mean(gaps) : null;
   const viewToFollowerRatio = followerCount && followerCount > 0 && averageViews > 0 ? averageViews / followerCount : null;
@@ -219,11 +213,7 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
     }
 
     if (!performance && !audienceRaw) {
-      errors.push({
-        handle,
-        error: stageErrors.performance || stageErrors.audience || "Instagram audit failed.",
-        stage: "full-analysis",
-      });
+      errors.push({ handle, error: stageErrors.performance || stageErrors.audience || "Instagram audit failed.", stage: "full-analysis" });
       continue;
     }
 
@@ -277,18 +267,7 @@ export async function buildWorkbook(results: ReelMetrics[]) {
   ];
   summary.getRow(1).font = { bold: true };
   for (const result of results) {
-    summary.addRow({
-      username: result.username,
-      reelsAnalyzed: result.reelsAnalyzed,
-      avgViews: result.avgViews,
-      medianViews: result.medianViews,
-      avgLikes: result.avgLikes,
-      avgComments: result.avgComments,
-      engagementRatePct: result.avgEngagementRatePct,
-      consistencyLabel: result.consistency.label,
-      avgDaysBetweenPosts: result.avgDaysBetweenPosts,
-      hiddenLikesCount: result.hiddenLikesCount,
-    });
+    summary.addRow({ username: result.username, reelsAnalyzed: result.reelsAnalyzed, avgViews: result.avgViews, medianViews: result.medianViews, avgLikes: result.avgLikes, avgComments: result.avgComments, engagementRatePct: result.avgEngagementRatePct, consistencyLabel: result.consistency.label, avgDaysBetweenPosts: result.avgDaysBetweenPosts, hiddenLikesCount: result.hiddenLikesCount });
   }
 
   const detail = workbook.addWorksheet("Reel Detail");
@@ -307,18 +286,7 @@ export async function buildWorkbook(results: ReelMetrics[]) {
   detail.getRow(1).font = { bold: true };
   for (const result of results) {
     for (const reel of result.perReel) {
-      detail.addRow({
-        username: result.username,
-        shortCode: reel.shortCode,
-        url: reel.url,
-        timestamp: reel.timestamp,
-        views: reel.views,
-        likes: reel.likesHidden ? "hidden" : reel.likes,
-        likesHidden: reel.likesHidden ? "Yes" : "No",
-        comments: reel.comments,
-        engagementRatePct: reel.engagementRate === null ? null : round(reel.engagementRate * 100, 2),
-        caption: reel.caption,
-      });
+      detail.addRow({ username: result.username, shortCode: reel.shortCode, url: reel.url, timestamp: reel.timestamp, views: reel.views, likes: reel.likesHidden ? "hidden" : reel.likes, likesHidden: reel.likesHidden ? "Yes" : "No", comments: reel.comments, engagementRatePct: reel.engagementRate === null ? null : round(reel.engagementRate * 100, 2), caption: reel.caption });
     }
   }
 
