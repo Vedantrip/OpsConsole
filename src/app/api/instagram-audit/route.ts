@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-// Allow extra time for Render's free-tier cold start (can take 30–60s on first call)
+// Audience enrichment is backed by a slower Apify actor, while the existing
+// OpsConsole deployment already allows a 60s request window.
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
@@ -13,19 +14,21 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
+  const endpoint = body?.full === false ? "/analyze" : "/analyze/full";
+  const { full: _full, ...payload } = body ?? {};
 
   try {
-    const upstream = await fetch(`${base}/analyze`, {
+    const upstream = await fetch(`${base}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     const data = await upstream.json();
 
     if (!upstream.ok) {
       return NextResponse.json(
-        { error: data?.error ?? "The scraper backend returned an error." },
+        { error: data?.error ?? "The scraper backend returned an error.", details: data?.errors ?? null },
         { status: upstream.status }
       );
     }
@@ -35,7 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Couldn't reach the scraper backend. If it's been idle, it may still be waking up (Render free tier) — try again in a moment.",
+          "Couldn't reach the scraper backend. Full audience analysis can take longer than the existing 60s proxy window; retry or use a smaller batch.",
       },
       { status: 502 }
     );
