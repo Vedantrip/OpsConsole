@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
-// Audience enrichment is backed by a slower Apify actor, while the existing
-// OpsConsole deployment already allows a 60s request window.
-export const maxDuration = 60;
+// Full audience enrichment is backed by a slower Apify actor. Allow the
+// proxy to wait longer than the old 60s window for deployments that support
+// extended serverless function duration.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const base = process.env.IG_SCRAPER_API_BASE;
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Couldn't reach the scraper backend. Full audience analysis can take longer than the existing 60s proxy window; retry or use a smaller batch.",
+          "Couldn't reach the scraper backend. Full audience analysis can take longer than the proxy window; retry or use a smaller batch.",
       },
       { status: 502 }
     );
