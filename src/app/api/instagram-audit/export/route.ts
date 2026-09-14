@@ -1,38 +1,25 @@
-// Full audience enrichment can exceed the old 60s proxy window.
-// Deployments that support extended serverless function duration can wait
-// for the synchronous scraper/export pipeline to complete.
+import { analyzeHandles, buildWorkbook } from "@/lib/instagram-audit";
+
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
-  const base = process.env.IG_SCRAPER_API_BASE;
-  if (!base) {
-    return new Response("IG_SCRAPER_API_BASE is not set in the environment.", { status: 500 });
+  try {
+    const body = await req.json();
+    if (!Array.isArray(body?.handles) || body.handles.length === 0) {
+      return new Response(JSON.stringify({ error: "Provide a non-empty 'handles' array." }), { status: 400 });
+    }
+    const audit = await analyzeHandles(body.handles, body.reelsLimit);
+    if (audit.results.length === 0) {
+      return new Response(JSON.stringify({ error: "All handles failed.", errors: audit.errors }), { status: 502 });
+    }
+    const workbook = await buildWorkbook(audit.results);
+    return new Response(workbook, {
+      headers: {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="mountlift-insights-${new Date().toISOString().slice(0, 10)}.xlsx"`,
+      },
+    });
+  } catch (error) {
+    return new Response(error instanceof Error ? error.message : "Export failed.", { status: 500 });
   }
-
-  const body = await req.json();
-  const endpoint = body?.full === false ? "/analyze/export" : "/analyze/full/export";
-  const { full: _full, ...payload } = body ?? {};
-
-  const upstream = await fetch(`${base}${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!upstream.ok) {
-    const text = await upstream.text();
-    return new Response(text || "Export failed.", { status: upstream.status });
-  }
-
-  const blob = await upstream.blob();
-
-  return new Response(blob, {
-    headers: {
-      "Content-Type":
-        upstream.headers.get("Content-Type") ??
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition":
-        upstream.headers.get("Content-Disposition") ?? 'attachment; filename="ig-audit.xlsx"',
-    },
-  });
 }

@@ -152,7 +152,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
         setError(`${data.errors.length} creator${data.errors.length === 1 ? "" : "s"} could not be fully analyzed. Completed profiles remain below.`);
       }
     } catch {
-      setError("Couldn't reach the scraper backend. Full audience intelligence can take longer than the existing proxy window — retry with fewer handles.");
+      setError("Couldn't complete the Instagram audit. Apify runs can take a few minutes — retry with fewer handles.");
     } finally {
       setLoading(false);
     }
@@ -223,7 +223,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
           </div>
           <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-line">
             <button className="btn flex items-center gap-2" onClick={runAudit} disabled={loading}>
-              {loading ? <><Loader2 size={14} className="animate-spin" /><span>Auditing audience + performance...</span></> : <><Play size={14} /><span>Run Full Audit</span></>}
+              {loading ? <><Loader2 size={14} className="animate-spin" /><span>Auditing public reels...</span></> : <><Play size={14} /><span>Run Audit</span></>}
             </button>
             <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-lift/10 text-lift border border-lift/20 hover:bg-lift/20 transition-colors" onClick={exportXlsx} disabled={exporting}>
               {exporting ? <><Loader2 size={12} className="animate-spin" /><span>Exporting...</span></> : <><FileSpreadsheet size={14} /><span>Export .xlsx</span></>}

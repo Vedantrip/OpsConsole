@@ -58,11 +58,11 @@ See `prisma/schema.prisma` for the full schema.
 - Brands — add/remove, view campaign count per brand
 - Campaigns — create, view detail page per campaign, add deliverables tied to creators
 - Finance — two ledgers: creator payouts (payable) and brand invoices (receivable)
-- Analytics — roster audits through the configured `IG_SCRAPER_API_BASE` service, with saved snapshots per creator
+- Analytics — roster audits through Apify, with saved snapshots per creator
 
 ### Instagram analytics
 
-The current audit flow fetches public profile data through the service configured by `IG_SCRAPER_API_BASE`. It can provide public metrics such as views, likes, comments, and posting consistency when the upstream service supports them.
+The audit flow runs inside this Next.js app and calls the Apify Instagram actor directly. Configure `APIFY_TOKEN`, optionally `APIFY_ACTOR_ID` (default: `apify~instagram-reel-scraper`), and `DEFAULT_REELS_LIMIT` in the deployment environment. The old `IG_SCRAPER_API_BASE` Render service is no longer used.
 
 It does not provide private Instagram Insights, follower demographics, or authenticated reach data. Those require an official Meta/Instagram Graph API integration, creator authorization, and the appropriate app permissions. The existing audit UI can remain as a public-profile fallback while that connection is added.
 
