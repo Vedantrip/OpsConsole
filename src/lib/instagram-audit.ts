@@ -1,4 +1,6 @@
 import ExcelJS from "exceljs";
+import { fetchAudienceForUsername } from "@/lib/instagram-audience";
+import { buildFullIntelligence } from "@/lib/instagram-intelligence";
 
 const APIFY_BASE = "https://api.apify.com/v2";
 const DEFAULT_REELS_LIMIT = Number(process.env.DEFAULT_REELS_LIMIT || 12);
@@ -46,6 +48,15 @@ export type ReelMetrics = {
     engagement: number | null;
     engagementRate: number | null;
   }>;
+};
+
+type FullResult = ReelMetrics & {
+  audience: any;
+  scores: any;
+  profile: any;
+  performance: any;
+  rawAudience?: unknown;
+  errors?: Record<string, string>;
 };
 
 function mean(values: number[]) {
@@ -171,41 +182,74 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
   };
 }
 
-export async function analyzeHandles(handles: string[], reelsLimit?: number) {
+export async function analyzeHandles(handles: string[], reelsLimit?: number, options: { full?: boolean } = {}) {
   const limit = Number(reelsLimit) || DEFAULT_REELS_LIMIT;
-  const results: ReelMetrics[] = [];
-  const errors: Array<{ handle: string; error: string }> = [];
+  const full = options.full !== false;
+  const results: FullResult[] = [];
+  const errors: Array<{ handle: string; error: string; stage?: string }> = [];
 
-  for (const handle of handles) {
+  for (const rawHandle of handles) {
+    const handle = String(rawHandle || "").trim().replace(/^@/, "");
+    if (!handle) {
+      errors.push({ handle: String(rawHandle), error: "Instagram handle cannot be empty.", stage: "validation" });
+      continue;
+    }
+
+    let performance: ReelMetrics | null = null;
+    let audienceRaw: unknown = null;
+    const stageErrors: Record<string, string> = {};
+
     try {
       const reels = await fetchReelsForUsername(handle, limit);
-      results.push(computeMetricsForUsername(handle.replace(/^@/, ""), reels));
+      performance = computeMetricsForUsername(handle, reels);
     } catch (error) {
-      errors.push({ handle, error: error instanceof Error ? error.message : "Instagram audit failed." });
+      stageErrors.performance = error instanceof Error ? error.message : "Instagram performance analysis failed.";
     }
+
+    if (full) {
+      try {
+        audienceRaw = await fetchAudienceForUsername(handle);
+      } catch (error) {
+        stageErrors.audience = error instanceof Error ? error.message : "Audience analysis failed.";
+      }
+    }
+
+    if (!performance && !audienceRaw) {
+      errors.push({
+        handle,
+        error: stageErrors.performance || stageErrors.audience || "Instagram audit failed.",
+        stage: "full-analysis",
+      });
+      continue;
+    }
+
+    const fullIntelligence = buildFullIntelligence(handle, performance || {}, audienceRaw || {});
+    const result: FullResult = {
+      ...fullIntelligence,
+      ...((performance || {}) as any),
+      profile: fullIntelligence.profile,
+      performance: fullIntelligence.performance,
+      audience: fullIntelligence.audience,
+      scores: fullIntelligence.scores,
+      rawAudience: fullIntelligence.rawAudience,
+      errors: stageErrors,
+    };
+    results.push(result);
   }
 
   return { results, errors };
 }
 
-export function toInsightsResult(metrics: ReelMetrics) {
+export function toInsightsResult(result: FullResult) {
   return {
-    username: metrics.username,
-    profile: { followers: metrics.followerCount, following: null, posts: null, verified: null, profileUrl: null },
-    performance: {
-      avgViews: metrics.avgViews,
-      medianViews: metrics.medianViews,
-      avgLikes: metrics.avgLikes,
-      avgComments: metrics.avgComments,
-      engagementRate: metrics.avgEngagementRatePct === null ? null : metrics.avgEngagementRatePct / 100,
-      postingFrequencyDays: metrics.avgDaysBetweenPosts,
-      viewToFollowerRatio: metrics.viewToFollowerRatioPct === null ? null : metrics.viewToFollowerRatioPct / 100,
-      reelsAnalyzed: metrics.reelsAnalyzed,
-      consistency: metrics.consistency,
-    },
-    audience: { source: "estimated", confidence: "low", gender: [], age: [], locations: [], interests: [] },
-    scores: {},
-    reels: metrics.perReel,
+    username: result.username,
+    profile: result.profile,
+    performance: result.performance,
+    audience: result.audience,
+    scores: result.scores,
+    rawAudience: result.rawAudience,
+    reels: result.perReel || [],
+    errors: result.errors || {},
   };
 }
 
