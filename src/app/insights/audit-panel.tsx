@@ -6,7 +6,6 @@ import { saveInsightSnapshot, saveInsightSnapshotForCreator, extractInsightMetri
 
 type Creator = { id: string; name: string; handle: string | null; platform: string | null };
 type AuditResult = Record<string, any>;
-
 type DistributionItem = { label: string; value: number | null };
 
 function pct(n: unknown) {
@@ -21,9 +20,9 @@ function num(n: unknown) {
 
 function consistencyColor(label: unknown) {
   const l = String(label ?? "").toLowerCase();
-  if (l.includes("consistent") && !l.includes("inconsistent")) return "bg-lift/10 text-lift border-lift/20";
+  if (l.includes("very consistent") || l === "consistent") return "bg-lift/10 text-lift border-lift/20";
   if (l.includes("somewhat")) return "bg-paper/10 text-paper border-paper/20";
-  if (l.includes("highly")) return "bg-amber/10 text-amber border-amber/20";
+  if (l.includes("highly inconsistent")) return "bg-amber/10 text-amber border-amber/20";
   return "bg-panel text-muted border-line";
 }
 
@@ -38,7 +37,10 @@ function distributionRows(value: unknown): DistributionItem[] {
   if (!Array.isArray(value)) return [];
   return value.filter(Boolean).map((item) => {
     if (typeof item === "string") return { label: item, value: null };
-    return { label: String(item.label ?? item.name ?? item.location ?? item.category ?? "Unknown"), value: typeof item.value === "number" ? item.value : null };
+    return {
+      label: String(item.label ?? item.name ?? item.location ?? item.category ?? "Unknown"),
+      value: typeof item.value === "number" ? item.value : null,
+    };
   });
 }
 
@@ -47,8 +49,7 @@ function Distribution({ title, icon, items }: { title: string; icon: React.React
   return (
     <div className="rounded-lg border border-line bg-ink/50 p-3">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted font-mono mb-2">
-        {icon}
-        <span>{title}</span>
+        {icon}<span>{title}</span>
       </div>
       {rows.length === 0 ? (
         <div className="text-xs text-muted">Not available from public signals.</div>
@@ -77,13 +78,8 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
   const [savedHandles, setSavedHandles] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
 
-  const igCreators = creators.filter(
-    (c) => c.handle && (!c.platform || c.platform.toLowerCase().includes("insta"))
-  );
-
-  const filteredRoster = igCreators.filter(
-    (c) => c.name.toLowerCase().includes(rosterSearch.toLowerCase()) || (c.handle && c.handle.toLowerCase().includes(rosterSearch.toLowerCase()))
-  );
+  const igCreators = creators.filter((c) => c.handle && (!c.platform || c.platform.toLowerCase().includes("insta")));
+  const filteredRoster = igCreators.filter((c) => c.name.toLowerCase().includes(rosterSearch.toLowerCase()) || (c.handle && c.handle.toLowerCase().includes(rosterSearch.toLowerCase())));
 
   function toggle(handle: string) {
     setSelected((prev) => prev.includes(handle) ? prev.filter((h) => h !== handle) : [...prev, handle]);
@@ -145,9 +141,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
           const metrics = await extractInsightMetrics(rawData);
           metricsMap[handle] = metrics;
           const rosterCreator = igCreators.find((creator) => creator.handle?.trim().replace(/^@/, "").toLowerCase() === handle.toLowerCase());
-          const savedInsight = rosterCreator
-            ? await saveInsightSnapshotForCreator(rosterCreator.id, rawData)
-            : await saveInsightSnapshot(handle, rawData);
+          const savedInsight = rosterCreator ? await saveInsightSnapshotForCreator(rosterCreator.id, rawData) : await saveInsightSnapshot(handle, rawData);
           if (savedInsight) saved.push(handle.toLowerCase());
         }
       }
@@ -262,7 +256,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-full bg-lift/10 border border-lift/20 text-lift flex items-center justify-center font-display font-bold">@</div>
                       <div>
-                        <div className="font-display font-semibold text-paper text-base flex items-center gap-2"><span>@{handle}</span>{profile.verified && <span className="text-[10px] text-lift font-mono">VERIFIED</span>}{isSaved && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-lift/10 text-lift border border-lift/20"><CheckCircle2 size={10} />Auto-Saved</span>}</div>
+                        <div className="font-display font-semibold text-paper text-base flex items-center gap-2"><span>@{handle}</span>{profile.verified === true && <span className="text-[10px] text-lift font-mono">VERIFIED</span>}{isSaved && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-lift/10 text-lift border border-lift/20"><CheckCircle2 size={10} />Auto-Saved</span>}</div>
                         <div className="text-[11px] text-muted font-mono">{num(profile.followers)} followers · {num(profile.following)} following · {num(profile.posts)} posts</div>
                       </div>
                     </div>
