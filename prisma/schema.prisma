@@ -58,17 +58,18 @@ model Brand {
 }
 
 model Creator {
-  id           String           @id @default(cuid())
-  name         String
-  handle       String?
-  platform     String?
-  email        String?
-  rateCard     String?
-  notes        String?
-  createdAt    DateTime         @default(now())
-  deliverables Deliverable[]
-  insights     CreatorInsight[]
+  id                 String                     @id @default(cuid())
+  name               String
+  handle             String?
+  platform           String?
+  email              String?
+  rateCard           String?
+  notes              String?
+  createdAt          DateTime                   @default(now())
+  deliverables       Deliverable[]
+  insights           CreatorInsight[]
   managerAssignments CreatorManagerAssignment[]
+  posts              Post[]
 }
 
 model CreatorManagerAssignment {
@@ -208,7 +209,7 @@ model Payout {
 
 model Invoice {
   id         String        @id @default(cuid())
-  brand      Brand          @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brand      Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
   brandId    String
   campaign   Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignId String?
@@ -218,3 +219,63 @@ model Invoice {
   dueAt      DateTime?
   paidAt     DateTime?
 }
+
+enum Platform {
+  INSTAGRAM
+  TIKTOK
+}
+
+enum ContentFormat {
+  REEL
+  POST
+  STORY
+  VIDEO
+  CAROUSEL
+}
+
+model Post {
+  id           String            @id @default(cuid())
+  creator      Creator           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId    String
+  platform     Platform
+  format       ContentFormat
+  caption      String?
+  url          String?
+  postedAt     DateTime
+  tags         ContentTag[]
+  metrics      PostMetrics?
+  demographics PostDemographics?
+  createdAt    DateTime          @default(now())
+
+  @@index([creatorId, postedAt])
+}
+
+model PostMetrics {
+  id          String   @id @default(cuid())
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId      String   @unique
+  views       Int?
+  likes       Int?
+  comments    Int?
+  shares      Int?
+  saves       Int?
+  reach       Int?
+  impressions Int?
+  enteredAt   DateTime @default(now())
+}
+
+model PostDemographics {
+  id           String @id @default(cuid())
+  post         Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId       String @unique
+  ageRanges    Json   // { "13-17": 4.2, "18-24": 38.1, "25-34": 35.2, ... } percentages
+  genderSplit  Json   // { "male": 41.2, "female": 57.1, "other": 1.7 }
+  topLocations Json   // [{ "location": "Mumbai", "percentage": 12.4 }, ...]
+}
+
+model ContentTag {
+  id    String @id @default(cuid())
+  name  String @unique
+  posts Post[]
+}
+

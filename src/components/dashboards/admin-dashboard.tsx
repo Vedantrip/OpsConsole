@@ -19,26 +19,180 @@ export default async function AdminDashboard() {
   const activeBudget = active.reduce((sum, campaign) => sum + Number(campaign.budget), 0);
   const attention = pending._count + invoices._count;
 
-  return <div className="space-y-7 animate-fade-up">
-    <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div><p className="eyebrow">Operations</p><h1 className="text-3xl font-display font-bold tracking-tight">Today&apos;s desk</h1><p className="text-sm text-muted mt-1">{attention ? `${plural(attention, "financial item")} need attention.` : "Nothing awaiting a finance decision."}</p></div>
-      <div className="flex items-center gap-2 flex-wrap"><Link href="/campaigns" className="quick-link"><Plus size={14} />Campaign</Link><Link href="/creators" className="quick-link"><Plus size={14} />Creator</Link><Link href="/api/export/finance" className="quick-link" download><FileSpreadsheet size={14} />Export</Link></div>
-    </header>
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">Operations & Finance</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Today&apos;s desk</h1>
+          <p className="text-xs text-muted mt-0.5">
+            {attention ? `${plural(attention, "financial item")} need attention.` : "All accounts and payouts are currently settled."}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link href="/campaigns" className="quick-link">
+            <Plus size={13} />
+            <span>Campaign</span>
+          </Link>
+          <Link href="/creators" className="quick-link">
+            <Plus size={13} />
+            <span>Creator</span>
+          </Link>
+          <Link href="/api/export/finance" className="quick-link" download>
+            <FileSpreadsheet size={13} />
+            <span>Export ledger</span>
+          </Link>
+        </div>
+      </header>
 
-    <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-      <Link href="/finance?status=outstanding" className={`lg:col-span-5 rounded-2xl p-6 border transition-all duration-300 ${payoutTotal > 0 ? "bg-amber/10 border-amber/30 hover:border-amber hover:-translate-y-0.5" : "card hover:border-lift/40 hover:-translate-y-0.5"}`}>
-        <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-mono uppercase tracking-wider text-muted">Creator payouts to clear</p><div className={`${payoutTotal > 0 ? "text-amber" : "text-lift"} text-4xl font-display font-semibold mt-3`}>{money(payoutTotal)}</div><p className="text-sm text-muted mt-2">{pending._count ? `${plural(pending._count, "payout")} pending` : "All creator payouts are settled"}</p></div>{payoutTotal > 0 && <AlertTriangle size={20} className="text-amber mt-1" aria-label="Action required" />}</div>
-      </Link>
-      <Link href="/finance?status=outstanding" className={`lg:col-span-3 card p-5 hover:border-lift/40 hover:-translate-y-0.5 ${invoiceTotal > 0 ? "border-amber/30" : ""}`}><p className="text-xs font-mono uppercase tracking-wider text-muted">Client invoices open</p><div className={`${invoiceTotal > 0 ? "text-amber" : "text-lift"} text-2xl font-display font-semibold mt-3`}>{money(invoiceTotal)}</div><p className="text-xs text-muted mt-2">{invoices._count ? `${plural(invoices._count, "invoice")} awaiting payment` : "No receivables outstanding"}</p></Link>
-      <Link href="/campaigns" className="lg:col-span-2 card p-5 hover:border-lift/40 hover:-translate-y-0.5"><p className="text-xs text-muted">Active campaigns</p><div className="text-3xl font-display font-semibold text-lift mt-3">{active.length}</div><p className="text-xs text-muted mt-2">{plural(campaignCount, "campaign")} total</p></Link>
-      <Link href="/creators" className="lg:col-span-2 card p-5 hover:border-lift/40 hover:-translate-y-0.5"><p className="text-xs text-muted">Creator roster</p><div className="text-3xl font-display font-semibold text-paper mt-3">{creatorCount}</div><p className="text-xs text-muted mt-2">Across {plural(brandCount, "brand")}</p></Link>
-    </section>
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+        <Link
+          href="/finance?status=outstanding"
+          className={`lg:col-span-4 card p-5 transition-colors ${
+            payoutTotal > 0 ? "border-gold/50 bg-gold/[0.04]" : ""
+          }`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-muted">Creator payouts to clear</p>
+              <div className="text-2xl font-bold font-mono text-gold stat-number mt-2">
+                {money(payoutTotal)}
+              </div>
+              <p className="text-xs text-muted mt-1.5">
+                {pending._count ? `${plural(pending._count, "payout")} pending clearance` : "All payouts settled"}
+              </p>
+            </div>
+            {payoutTotal > 0 && <AlertTriangle size={18} className="text-gold shrink-0 mt-0.5" />}
+          </div>
+        </Link>
 
-    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <div className="lg:col-span-2 card overflow-hidden"><div className="px-6 pt-5 pb-4 flex items-end justify-between gap-3"><div><h2 className="text-lg font-display font-semibold">Active campaigns</h2><p className="text-xs text-muted mt-1">{money(activeBudget)} currently committed</p></div><Link href="/campaigns" className="text-xs text-lift hover:underline inline-flex gap-1 items-center">View all <ArrowRight size={12} /></Link></div><div className="divide-y divide-line">{active.length === 0 ? <div className="px-6 py-10 text-sm text-muted">No active campaigns yet.</div> : active.slice(0, 5).map(c => <Link key={c.id} href={`/campaigns/${c.id}`} className="table-row flex items-center justify-between gap-4 px-6 py-4"><div><p className="font-medium text-paper">{c.name}</p><p className="text-xs text-muted mt-1">{c.brand.name} · {plural(c._count.deliverables, "deliverable")}</p></div><div className="text-right"><p className="font-mono text-sm text-lift font-semibold">{money(Number(c.budget))}</p><p className="text-[10px] text-muted uppercase tracking-wide">Budget</p></div></Link>)}</div></div>
-      <aside className="rounded-2xl border border-amber/25 bg-amber/5 overflow-hidden transition-all duration-300 hover:border-amber/40"><div className="px-5 py-4 border-b border-amber/15"><h2 className="font-display font-semibold text-paper">Payout queue</h2><p className="text-xs text-muted mt-1">Only items needing a decision.</p></div>{payoutQueue.length === 0 ? <p className="p-5 text-sm text-muted">No payouts waiting.</p> : <div className="divide-y divide-amber/10">{payoutQueue.map(p => <Link key={p.id} href="/finance?status=outstanding" className="block px-5 py-4 hover:bg-amber/10 transition-colors"><div className="flex justify-between gap-3"><div><p className="text-sm font-medium text-paper">{p.deliverable.creator.name}</p><p className="text-xs text-muted mt-1">{p.deliverable.campaign.name}</p></div><p className="font-mono text-sm text-amber font-semibold">{money(Number(p.amount))}</p></div></Link>)}</div>}<div className="px-5 py-4 border-t border-amber/15"><Link href="/finance?status=outstanding" className="text-xs text-amber hover:underline">Review payouts →</Link></div></aside>
-    </section>
+        <Link
+          href="/finance?status=outstanding"
+          className="lg:col-span-3 card p-5 transition-colors"
+        >
+          <p className="text-xs font-medium text-muted">Client invoices open</p>
+          <div className="text-2xl font-bold font-mono text-ink stat-number mt-2">
+            {money(invoiceTotal)}
+          </div>
+          <p className="text-xs text-muted mt-1.5">
+            {invoices._count ? `${plural(invoices._count, "invoice")} awaiting payment` : "No receivables open"}
+          </p>
+        </Link>
 
-    <section className="max-w-2xl"><div className="flex items-center justify-between mb-3"><h2 className="text-sm font-display font-semibold">Recently added creators</h2><Link href="/creators" className="text-xs text-lift hover:underline">Roster →</Link></div><div className="flex flex-wrap gap-x-6 gap-y-3">{recentCreators.map(creator => <div key={creator.id} className="text-sm"><span className="font-medium text-paper">{creator.name}</span><span className="text-muted font-mono text-xs ml-2">{creator.handle ? `@${creator.handle.replace(/^@/, "")}` : "no handle"} · {plural(creator._count.deliverables, "deliverable")}</span></div>)}</div></section>
-  </div>;
+        <Link href="/campaigns" className="lg:col-span-2 card p-5 transition-colors">
+          <p className="text-xs font-medium text-muted">Active campaigns</p>
+          <div className="text-2xl font-bold font-mono text-ink stat-number mt-2">
+            {active.length}
+          </div>
+          <p className="text-xs text-muted mt-1.5">{plural(campaignCount, "campaign")} total</p>
+        </Link>
+
+        <Link href="/creators" className="lg:col-span-3 card p-5 transition-colors">
+          <p className="text-xs font-medium text-muted">Creator roster</p>
+          <div className="text-2xl font-bold font-mono text-ink stat-number mt-2">
+            {creatorCount}
+          </div>
+          <p className="text-xs text-muted mt-1.5">Across {plural(brandCount, "brand")}</p>
+        </Link>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+        <div className="lg:col-span-2 card overflow-hidden">
+          <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Active campaigns</h2>
+              <p className="text-xs text-muted mt-0.5">{money(activeBudget)} currently committed</p>
+            </div>
+            <Link href="/campaigns" className="text-xs text-gold hover:underline flex items-center gap-1 font-medium">
+              View all <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="divide-y divide-line">
+            {active.length === 0 ? (
+              <div className="p-8 text-center text-xs text-muted">No active campaigns running right now.</div>
+            ) : (
+              active.slice(0, 5).map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/campaigns/${c.id}`}
+                  className="table-row flex items-center justify-between gap-4 px-5 py-3.5"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-xs text-ink truncate">{c.name}</p>
+                    <p className="text-[11px] text-muted mt-0.5">
+                      {c.brand.name} • {plural(c._count.deliverables, "deliverable")}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-mono text-xs text-gold font-semibold">{money(Number(c.budget))}</p>
+                    <p className="text-[10px] text-muted uppercase">Budget</p>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+
+        <aside className="card overflow-hidden">
+          <div className="px-5 py-4 border-b border-line">
+            <h2 className="text-sm font-semibold text-ink">Payout queue</h2>
+            <p className="text-xs text-muted mt-0.5">Items awaiting settlement</p>
+          </div>
+          {payoutQueue.length === 0 ? (
+            <div className="p-6 text-center text-xs text-muted">No creator payouts waiting.</div>
+          ) : (
+            <div className="divide-y divide-line">
+              {payoutQueue.map((p) => (
+                <Link
+                  key={p.id}
+                  href="/finance?status=outstanding"
+                  className="table-row block px-5 py-3"
+                >
+                  <div className="flex justify-between items-center gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-ink truncate">{p.deliverable.creator.name}</p>
+                      <p className="text-[11px] text-muted truncate mt-0.5">{p.deliverable.campaign.name}</p>
+                    </div>
+                    <p className="font-mono text-xs text-gold font-semibold shrink-0">
+                      {money(Number(p.amount))}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="px-5 py-3 border-t border-line bg-paper/30">
+            <Link href="/finance?status=outstanding" className="text-xs text-gold hover:underline font-medium">
+              Review all payouts →
+            </Link>
+          </div>
+        </aside>
+      </section>
+
+      <section className="card p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Recently Added Creators
+          </h2>
+          <Link href="/creators" className="text-xs text-gold hover:underline font-medium">
+            Roster ({creatorCount}) →
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {recentCreators.map((creator) => (
+            <Link
+              key={creator.id}
+              href={`/creators/${creator.id}`}
+              className="text-xs hover:text-gold transition-colors py-1 inline-flex items-center gap-1.5"
+            >
+              <span className="font-medium text-ink">{creator.name}</span>
+              <span className="text-muted font-mono text-[11px]">
+                {creator.handle ? (creator.handle.startsWith("@") ? creator.handle : `@${creator.handle}`) : "no handle"}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
 }

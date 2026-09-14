@@ -44,41 +44,40 @@ export default async function Sidebar() {
         </details>
       </header>
 
-      <aside className="hidden md:flex w-64 shrink-0 bg-[#421b38] text-[#fff8f2] h-screen sticky top-0 flex-col relative overflow-hidden shadow-[8px_0_30px_rgba(63,24,53,0.12)]">
-        {/* Topographic contour-line watermark — MountLift Sunset Orange signature */}
+      <aside className="hidden md:flex w-64 shrink-0 bg-charcoal text-[#FAF8F4] h-screen sticky top-0 flex-col relative overflow-hidden border-r border-[#332E27]">
+        {/* Subtle geometric watermark */}
         <svg
-          className="absolute -top-8 -right-16 w-64 h-64 opacity-[0.08] pointer-events-none"
+          className="absolute -top-12 -right-12 w-56 h-56 opacity-[0.04] pointer-events-none text-gold"
           viewBox="0 0 200 200"
           fill="none"
         >
-          {[30, 50, 70, 90, 110, 130].map((r) => (
-            <path
-              key={r}
-              d={`M 100 ${100 - r} C ${100 + r * 0.9} ${100 - r}, ${100 + r} ${100 - r * 0.3}, ${100 + r} 100 C ${100 + r} ${100 + r * 0.5}, ${100 + r * 0.4} ${100 + r}, 100 ${100 + r} C ${100 - r * 0.6} ${100 + r}, ${100 - r} ${100 + r * 0.4}, ${100 - r} 100 C ${100 - r} ${100 - r * 0.3}, ${100 - r * 0.7} ${100 - r}, 100 ${100 - r} Z`}
-              stroke="#f7a4bd"
-              strokeWidth="1.2"
-            />
-          ))}
+          <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="100" cy="100" r="50" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="100" cy="100" r="20" stroke="currentColor" strokeWidth="1.5" />
         </svg>
 
-        <div className="px-5 py-6 border-b border-white/10 relative">
+        <div className="px-5 py-5 border-b border-[#332E27] relative">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="font-display font-bold text-lg tracking-tight text-white flex items-center gap-2">
-                <span className="w-7 h-7 rounded-[8px] bg-[#ed4d80] text-white flex items-center justify-center text-xs font-sans">ml</span>
+              <div className="font-sans font-bold text-base tracking-tight text-white flex items-center gap-2">
+                <span className="w-6 h-6 rounded bg-gold text-charcoal flex items-center justify-center text-xs font-bold font-mono">
+                  ML
+                </span>
                 MountLift
               </div>
-              <div className="text-[10px] tracking-[0.1em] text-[#d6afc5] mt-1 font-mono">agency ops console</div>
+              <div className="text-[11px] tracking-wider uppercase text-muted mt-1 font-mono">
+                OpsConsole
+              </div>
             </div>
           </div>
-          <div className="mt-5">
+          <div className="mt-4">
             <RoleBadge role={role} />
           </div>
         </div>
 
         <SidebarNav links={links} unreadMessageCount={unreadMessageCount} />
 
-        <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between gap-3 relative bg-black/10">
+        <div className="px-4 py-3 border-t border-[#332E27] flex items-center justify-between gap-3 relative bg-black/20">
           <ThemeToggle iconOnly />
           <div className="flex items-center">
             <UserButton afterSignOutUrl="/sign-in" />

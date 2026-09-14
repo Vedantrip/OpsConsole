@@ -53,8 +53,14 @@ export default async function AccountManagerDashboard() {
 
   return <div className="space-y-8 animate-fade-up">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div><p className="eyebrow">Brand workspace</p><h1 className="text-3xl font-display font-bold tracking-tight">Your project pulse</h1><p className="text-sm text-muted mt-1">A clear view of the budget, creators, and deliverables MountLift is managing for you.</p></div>
-      <Link href="/campaigns" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-md bg-lift text-white hover:opacity-90 transition-all w-fit shadow-md hover:scale-[1.02]">Open project details <ArrowRight size={14} /></Link>
+      <div>
+        <p className="eyebrow">Brand workspace</p>
+        <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">Your project pulse</h1>
+        <p className="text-sm text-muted mt-1">A clear view of the budget, creators, and deliverables MountLift is managing for you.</p>
+      </div>
+      <Link href="/campaigns" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md bg-ink text-paper hover:bg-charcoal transition-colors w-fit">
+        Open project details <ArrowRight size={14} />
+      </Link>
     </div>
 
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -65,14 +71,129 @@ export default async function AccountManagerDashboard() {
     </div>
 
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-      <section className="xl:col-span-3"><div className="flex items-center justify-between mb-4"><div><p className="eyebrow">Delivery tracker</p><h2 className="text-lg font-display font-semibold text-paper">What&apos;s happening next</h2></div><span className="text-xs text-muted font-mono">{upcoming.length} upcoming</span></div><div className="card overflow-hidden">{upcoming.length === 0 ? <div className="p-7 text-center"><CheckCircle2 size={23} className="mx-auto text-lift mb-2" /><p className="text-sm text-paper">No open deadlines right now</p><p className="text-xs text-muted mt-1">New creator deliverables will appear here when a deadline is set.</p></div> : <div className="divide-y divide-line">{upcoming.map((d) => { const overdue = d.dueDate && d.dueDate.getTime() < Date.now(); return <Link key={d.id} href={`/campaigns/${d.campaign.id}`} className="group block px-5 py-4 hover:bg-paper/[0.04] transition-colors"><div className="flex items-start gap-3"><div className="w-9 h-9 rounded-xl bg-lift/10 border border-lift/20 text-lift flex items-center justify-center shrink-0"><CalendarDays size={17} /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap gap-2 items-center"><span className="text-sm font-semibold text-paper">{d.type.charAt(0) + d.type.slice(1).toLowerCase()} by {d.creator.name}</span><span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono ${statusTone[d.status]}`}>{d.status.replace("_", " ")}</span></div><p className="text-xs text-muted mt-1 truncate">{d.campaign.name} · {d.campaign.brand.name}</p><p className={`text-[11px] font-mono mt-2 ${overdue ? "text-amber" : "text-muted"}`}>{dueText(d.dueDate)}</p></div><ArrowRight size={15} className="mt-2 text-muted group-hover:text-lift group-hover:translate-x-0.5 transition-all" /></div></Link>; })}</div>}</div></section>
-      <section className="xl:col-span-2"><div className="mb-4"><p className="eyebrow">Your assigned team</p><h2 className="text-lg font-display font-semibold text-paper">Creators on your product</h2></div><div className="card divide-y divide-line overflow-hidden">{creatorMap.size === 0 ? <p className="p-6 text-center text-sm text-muted">Creator assignments will appear once deliverables are scheduled.</p> : Array.from(creatorMap.entries()).map(([id, creator]) => <div key={id} className="px-5 py-4"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-full bg-lift/10 border border-lift/20 text-lift flex items-center justify-center font-display font-bold text-xs uppercase">{creator.name.charAt(0)}</div><div className="min-w-0"><p className="text-sm font-medium text-paper">{creator.name}</p><p className="text-[11px] text-muted font-mono truncate">{creator.deliverableCount} deliverable{creator.deliverableCount === 1 ? "" : "s"} · {Array.from(creator.campaignNames).join(", ")}</p></div></div></div>)}</div><p className="mt-3 text-[11px] text-muted flex gap-1.5"><Users size={13} className="shrink-0" />You only see creators assigned to work on your campaigns.</p></section>
+      <section className="xl:col-span-3">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="eyebrow">Delivery tracker</p>
+            <h2 className="text-base font-display font-semibold text-ink">What&apos;s happening next</h2>
+          </div>
+          <span className="text-xs text-muted font-mono">{upcoming.length} upcoming</span>
+        </div>
+        <div className="card overflow-hidden">
+          {upcoming.length === 0 ? (
+            <div className="p-7 text-center">
+              <CheckCircle2 size={22} className="mx-auto text-gold mb-2 opacity-60" />
+              <p className="text-sm font-medium text-ink">No open deadlines right now</p>
+              <p className="text-xs text-muted mt-1">New creator deliverables will appear here when a deadline is set.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-line">
+              {upcoming.map((d) => {
+                const overdue = d.dueDate && d.dueDate.getTime() < Date.now();
+                return (
+                  <Link key={d.id} href={`/campaigns/${d.campaign.id}`} className="group block px-5 py-3.5 hover:bg-paper/80 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-md bg-paper border border-line text-muted flex items-center justify-center shrink-0">
+                        <CalendarDays size={15} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <span className="text-sm font-medium text-ink">{d.type.charAt(0) + d.type.slice(1).toLowerCase()} by {d.creator.name}</span>
+                          <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono ${statusTone[d.status]}`}>{d.status.replace("_", " ")}</span>
+                        </div>
+                        <p className="text-xs text-muted mt-0.5 truncate">{d.campaign.name} · {d.campaign.brand.name}</p>
+                        <p className={`text-[11px] font-mono mt-1.5 ${overdue ? "text-viz-rose" : "text-muted"}`}>{dueText(d.dueDate)}</p>
+                      </div>
+                      <ArrowRight size={15} className="mt-2 text-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+      
+      <section className="xl:col-span-2">
+        <div className="mb-4">
+          <p className="eyebrow">Your assigned team</p>
+          <h2 className="text-base font-display font-semibold text-ink">Creators on your product</h2>
+        </div>
+        <div className="card divide-y divide-line overflow-hidden">
+          {creatorMap.size === 0 ? (
+            <p className="p-6 text-center text-sm text-muted">Creator assignments will appear once deliverables are scheduled.</p>
+          ) : (
+            Array.from(creatorMap.entries()).map(([id, creator]) => (
+              <div key={id} className="px-5 py-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-paper border border-line text-ink flex items-center justify-center font-display font-semibold text-xs uppercase">
+                    {creator.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink">{creator.name}</p>
+                    <p className="text-[11px] text-muted font-mono truncate">{creator.deliverableCount} deliverable{creator.deliverableCount === 1 ? "" : "s"} · {Array.from(creator.campaignNames).join(", ")}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        <p className="mt-2.5 text-[11px] text-muted flex gap-1.5 items-center"><Users size={13} className="shrink-0" />You only see creators assigned to work on your campaigns.</p>
+      </section>
     </div>
 
-    <section><div className="flex items-center justify-between mb-4"><div><p className="eyebrow">Project status</p><h2 className="text-lg font-display font-semibold text-paper">Campaign overview</h2></div><Link href="/campaigns" className="text-xs text-lift hover:underline inline-flex items-center gap-1">All campaign details <ArrowRight size={12} /></Link></div><div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{campaigns.length === 0 ? <div className="col-span-full card p-7 text-center text-sm text-muted">No campaigns have been shared with you yet.</div> : campaigns.map((campaign) => { const done = campaign.deliverables.filter((d) => ["APPROVED", "LIVE"].includes(d.status)).length; const progress = campaign.deliverables.length ? Math.round((done / campaign.deliverables.length) * 100) : 0; return <Link key={campaign.id} href={`/campaigns/${campaign.id}`} className="card p-5 hover:border-lift/50 hover:-translate-y-0.5 transition-all"><div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-semibold text-paper">{campaign.name}</h3><p className="text-xs text-muted mt-1">{campaign.brand.name}</p></div><CircleDot size={17} className={campaign.status === "ACTIVE" ? "text-lift" : "text-muted"} /></div><div className="mt-5"><div className="flex justify-between text-[11px] font-mono text-muted mb-2"><span>{done}/{campaign.deliverables.length} delivered</span><span className="text-paper">{progress}%</span></div><div className="h-1.5 rounded-full bg-ink overflow-hidden"><div className="h-full rounded-full bg-lift transition-all duration-500" style={{ width: `${progress}%` }} /></div></div><div className="mt-4 pt-3 border-t border-line flex justify-between items-center text-[11px] font-mono"><span className="text-muted">{campaign.endDate ? `Brand due ${dateText(campaign.endDate)}` : "Timeline to be confirmed"}</span><span className="text-lift inline-flex items-center gap-1">View <ArrowRight size={12} /></span></div></Link>; })}</div></section>
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="eyebrow">Project status</p>
+          <h2 className="text-base font-display font-semibold text-ink">Campaign overview</h2>
+        </div>
+        <Link href="/campaigns" className="text-xs text-gold hover:underline inline-flex items-center gap-1 font-medium">All campaign details <ArrowRight size={12} /></Link>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {campaigns.length === 0 ? (
+          <div className="col-span-full card p-7 text-center text-sm text-muted">No campaigns have been shared with you yet.</div>
+        ) : (
+          campaigns.map((campaign) => {
+            const done = campaign.deliverables.filter((d) => ["APPROVED", "LIVE"].includes(d.status)).length;
+            const progress = campaign.deliverables.length ? Math.round((done / campaign.deliverables.length) * 100) : 0;
+            return (
+              <Link key={campaign.id} href={`/campaigns/${campaign.id}`} className="card p-5 hover:border-gold transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-ink">{campaign.name}</h3>
+                    <p className="text-xs text-muted mt-0.5">{campaign.brand.name}</p>
+                  </div>
+                  <CircleDot size={16} className={campaign.status === "ACTIVE" ? "text-gold" : "text-muted"} />
+                </div>
+                <div className="mt-4">
+                  <div className="flex justify-between text-[11px] font-mono text-muted mb-1.5">
+                    <span>{done}/{campaign.deliverables.length} delivered</span>
+                    <span className="text-ink font-medium">{progress}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-paper border border-line overflow-hidden">
+                    <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-line flex justify-between items-center text-[11px] font-mono">
+                  <span className="text-muted">{campaign.endDate ? `Brand due ${dateText(campaign.endDate)}` : "Timeline to be confirmed"}</span>
+                  <span className="text-gold inline-flex items-center gap-1 font-medium">View <ArrowRight size={12} /></span>
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+    </section>
   </div>;
 }
 
 function Metric({ label, value, note, accent = false }: { label: string; value: string; note: string; accent?: boolean }) {
-  return <div className="card p-5 transition-all duration-300 hover:-translate-y-0.5"><p className="text-xs text-muted font-medium mb-2">{label}</p><p className={`text-2xl font-display font-semibold ${accent ? "text-lift" : "text-paper"}`}>{value}</p><p className="text-[11px] text-muted mt-1">{note}</p></div>;
+  return (
+    <div className="card p-5">
+      <p className="text-xs text-muted font-medium mb-1">{label}</p>
+      <p className={`text-2xl font-display font-semibold stat-number ${accent ? "text-gold" : "text-ink"}`}>{value}</p>
+      <p className="text-[11px] text-muted mt-1">{note}</p>
+    </div>
+  );
 }

@@ -6,12 +6,20 @@ const config: Config = {
     extend: {
       colors: {
         ink: "var(--color-ink)",
-        panel: "var(--color-panel)",
-        line: "var(--color-line)",
         paper: "var(--color-paper)",
-        lift: "var(--color-lift)",
-        amber: "var(--color-amber)",
+        charcoal: "var(--color-charcoal)",
+        gold: "var(--color-gold)",
+        line: "var(--color-line)",
         muted: "var(--color-muted)",
+        panel: "var(--color-panel)",
+        lift: "var(--color-gold)", // alias for compatibility
+        amber: "var(--color-gold)", // alias for compatibility
+        viz: {
+          gold: "#CC9A3D",
+          teal: "#3F6B62",
+          rose: "#B15C67",
+          slate: "#52657A",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
