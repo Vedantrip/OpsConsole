@@ -4,6 +4,13 @@ import { analyzeHandles, toInsightsResult } from "@/lib/instagram-audit";
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  if (!process.env.APIFY_API_TOKEN) {
+    return NextResponse.json(
+      { error: "APIFY_API_TOKEN is not configured for this deployment." },
+      { status: 500 }
+    );
+  }
+
   try {
     const body = await req.json();
     if (!Array.isArray(body?.handles) || body.handles.length === 0) {

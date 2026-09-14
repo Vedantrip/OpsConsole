@@ -85,8 +85,8 @@ function consistencyLabel(coefficientOfVariation: number | null) {
 }
 
 export async function fetchReelsForUsername(username: string, limit = DEFAULT_REELS_LIMIT) {
-  const token = process.env.APIFY_TOKEN;
-  if (!token) throw new Error("APIFY_TOKEN is not set in the environment.");
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) throw new Error("APIFY_API_TOKEN is not set in the environment.");
 
   const cleanUsername = username.trim().replace(/^@/, "");
   if (!cleanUsername) throw new Error("Instagram handle cannot be empty.");

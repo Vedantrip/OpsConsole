@@ -62,7 +62,7 @@ See `prisma/schema.prisma` for the full schema.
 
 ### Instagram analytics
 
-The audit flow runs inside this Next.js app and calls the Apify Instagram actor directly. Configure `APIFY_TOKEN`, optionally `APIFY_ACTOR_ID` (default: `apify~instagram-reel-scraper`), and `DEFAULT_REELS_LIMIT` in the deployment environment. The old `IG_SCRAPER_API_BASE` Render service is no longer used.
+The audit flow runs inside this Next.js app and calls the Apify Instagram actor directly. Configure `APIFY_API_TOKEN`, optionally `APIFY_ACTOR_ID` (default: `apify~instagram-reel-scraper`), and `DEFAULT_REELS_LIMIT` in the deployment environment. The old `IG_SCRAPER_API_BASE` Render service is no longer used.
 
 It does not provide private Instagram Insights, follower demographics, or authenticated reach data. Those require an official Meta/Instagram Graph API integration, creator authorization, and the appropriate app permissions. The existing audit UI can remain as a public-profile fallback while that connection is added.
 
