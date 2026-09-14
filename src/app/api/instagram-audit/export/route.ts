@@ -7,11 +7,13 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
+  const endpoint = body?.full === false ? "/analyze/export" : "/analyze/full/export";
+  const { full: _full, ...payload } = body ?? {};
 
-  const upstream = await fetch(`${base}/analyze/export`, {
+  const upstream = await fetch(`${base}${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
 
   if (!upstream.ok) {
