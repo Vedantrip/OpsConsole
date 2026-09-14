@@ -1,4 +1,7 @@
-export const maxDuration = 60;
+// Full audience enrichment can exceed the old 60s proxy window.
+// Deployments that support extended serverless function duration can wait
+// for the synchronous scraper/export pipeline to complete.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const base = process.env.IG_SCRAPER_API_BASE;
