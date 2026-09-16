@@ -33,7 +33,7 @@ export function navLinksForRole(role: Role | null) {
     { href: "/creators", label: "Creators" },
     { href: "/brands", label: "Brands" },
     { href: "/campaigns", label: "Campaigns" },
-      { href: "/messages", label: "Messages" },
+    { href: "/messages", label: "Messages" },
     { href: "/finance", label: "Finance" },
     { href: "/insights", label: "Insights" },
     { href: "/team", label: "Team & Access" },

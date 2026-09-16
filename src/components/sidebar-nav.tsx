@@ -20,7 +20,7 @@ const icons: Record<string, LucideIcon> = {
   Creators: Users,
   Brands: BriefcaseBusiness,
   Campaigns: Megaphone,
-    Messages: MessageCircle,
+  Messages: MessageCircle,
   Finance: WalletCards,
   Insights: BarChart3,
   "Team & Access": ShieldCheck,
