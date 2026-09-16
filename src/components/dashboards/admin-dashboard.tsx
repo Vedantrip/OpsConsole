@@ -47,7 +47,7 @@ export default async function AdminDashboard() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
         <Link
-          href="/finance?status=outstanding"
+          href="/finance?status=OUTSTANDING"
           className={`lg:col-span-4 card p-5 transition-colors ${
             payoutTotal > 0 ? "border-gold/50 bg-gold/[0.04]" : ""
           }`}
@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
         </Link>
 
         <Link
-          href="/finance?status=outstanding"
+          href="/finance?status=OUTSTANDING"
           className="lg:col-span-3 card p-5 transition-colors"
         >
           <p className="text-xs font-medium text-muted">Client invoices open</p>
@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
               {payoutQueue.map((p) => (
                 <Link
                   key={p.id}
-                  href="/finance?status=outstanding"
+                  href="/finance?status=OUTSTANDING"
                   className="table-row block px-5 py-3"
                 >
                   <div className="flex justify-between items-center gap-3">
@@ -162,7 +162,7 @@ export default async function AdminDashboard() {
             </div>
           )}
           <div className="px-5 py-3 border-t border-line bg-paper/30">
-            <Link href="/finance?status=outstanding" className="text-xs text-gold hover:underline font-medium">
+            <Link href="/finance?status=OUTSTANDING" className="text-xs text-gold hover:underline font-medium">
               Review all payouts →
             </Link>
           </div>

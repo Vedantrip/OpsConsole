@@ -52,30 +52,34 @@ export default async function AccountManagerDashboard() {
   const upcoming = deliverables.filter((d) => d.dueDate && !["APPROVED", "LIVE"].includes(d.status)).sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime()).slice(0, 5);
 
   return <div className="space-y-8 animate-fade-up">
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div>
-        <p className="eyebrow">Brand workspace</p>
-        <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">Your project pulse</h1>
-        <p className="text-sm text-muted mt-1">A clear view of the budget, creators, and deliverables MountLift is managing for you.</p>
+    <div className="card p-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <p className="eyebrow">Brand partnerships & accounts</p>
+          <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">Client portfolio pulse</h1>
+          <p className="text-sm text-muted mt-1">
+            Track campaign execution, creator milestones, and budget delivery across your assigned brand accounts.
+          </p>
+        </div>
+        <Link href="/campaigns" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md bg-ink text-paper hover:bg-charcoal transition-colors w-fit">
+          Explore campaigns <ArrowRight size={14} />
+        </Link>
       </div>
-      <Link href="/campaigns" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md bg-ink text-paper hover:bg-charcoal transition-colors w-fit">
-        Open project details <ArrowRight size={14} />
-      </Link>
     </div>
 
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <Metric label="Project budget" value={budget.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })} note="Budget supplied across your campaigns" accent />
-      <Metric label="Campaigns" value={String(campaigns.length)} note="Projects MountLift is managing" />
-      <Metric label="Creator assignments" value={String(creatorMap.size)} note="Creators working on your product" />
-      <Metric label="Delivery progress" value={deliverables.length ? `${completed}/${deliverables.length}` : "—"} note={deliverables.length ? `${active} deliverables still in progress` : "No deliverables assigned yet"} accent />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up">
+      <Metric label="Managed budget" value={budget.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })} note="Across your assigned brand campaigns" accent />
+      <Metric label="Active campaigns" value={String(campaigns.length)} note="Campaigns in execution" />
+      <Metric label="Active creators" value={String(creatorMap.size)} note="Creators delivering for your brands" />
+      <Metric label="Delivery progress" value={deliverables.length ? `${completed}/${deliverables.length}` : "—"} note={deliverables.length ? `${active} deliverables in progress` : "No deliverables scheduled yet"} accent />
     </div>
 
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
       <section className="xl:col-span-3">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="eyebrow">Delivery tracker</p>
-            <h2 className="text-base font-display font-semibold text-ink">What&apos;s happening next</h2>
+            <p className="eyebrow">Delivery timeline</p>
+            <h2 className="text-base font-display font-semibold text-ink">Upcoming campaign deliverables</h2>
           </div>
           <span className="text-xs text-muted font-mono">{upcoming.length} upcoming</span>
         </div>
@@ -83,8 +87,8 @@ export default async function AccountManagerDashboard() {
           {upcoming.length === 0 ? (
             <div className="p-7 text-center">
               <CheckCircle2 size={22} className="mx-auto text-gold mb-2 opacity-60" />
-              <p className="text-sm font-medium text-ink">No open deadlines right now</p>
-              <p className="text-xs text-muted mt-1">New creator deliverables will appear here when a deadline is set.</p>
+              <p className="text-sm font-medium text-ink">All campaign deliverables are up to date</p>
+              <p className="text-xs text-muted mt-1">Upcoming creator deadlines will appear here once scheduled.</p>
             </div>
           ) : (
             <div className="divide-y divide-line">
@@ -101,8 +105,8 @@ export default async function AccountManagerDashboard() {
                           <span className="text-sm font-medium text-ink">{d.type.charAt(0) + d.type.slice(1).toLowerCase()} by {d.creator.name}</span>
                           <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono ${statusTone[d.status]}`}>{d.status.replace("_", " ")}</span>
                         </div>
-                        <p className="text-xs text-muted mt-0.5 truncate">{d.campaign.name} · {d.campaign.brand.name}</p>
-                        <p className={`text-[11px] font-mono mt-1.5 ${overdue ? "text-viz-rose" : "text-muted"}`}>{dueText(d.dueDate)}</p>
+                        <p className="text-xs text-muted mt-0.5 truncate"><span className="font-medium text-ink">{d.campaign.brand.name}</span> · {d.campaign.name}</p>
+                        <p className={`text-[11px] font-mono mt-1.5 ${overdue ? "text-viz-rose font-medium" : "text-muted"}`}>{dueText(d.dueDate)}</p>
                       </div>
                       <ArrowRight size={15} className="mt-2 text-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" />
                     </div>
@@ -116,12 +120,12 @@ export default async function AccountManagerDashboard() {
       
       <section className="xl:col-span-2">
         <div className="mb-4">
-          <p className="eyebrow">Your assigned team</p>
-          <h2 className="text-base font-display font-semibold text-ink">Creators on your product</h2>
+          <p className="eyebrow">Collaborating talent</p>
+          <h2 className="text-base font-display font-semibold text-ink">Creators on your accounts</h2>
         </div>
         <div className="card divide-y divide-line overflow-hidden">
           {creatorMap.size === 0 ? (
-            <p className="p-6 text-center text-sm text-muted">Creator assignments will appear once deliverables are scheduled.</p>
+            <p className="p-6 text-center text-sm text-muted">Creator assignments will appear once campaign deliverables are scheduled.</p>
           ) : (
             Array.from(creatorMap.entries()).map(([id, creator]) => (
               <div key={id} className="px-5 py-3.5">
@@ -138,21 +142,21 @@ export default async function AccountManagerDashboard() {
             ))
           )}
         </div>
-        <p className="mt-2.5 text-[11px] text-muted flex gap-1.5 items-center"><Users size={13} className="shrink-0" />You only see creators assigned to work on your campaigns.</p>
+        <p className="mt-2.5 text-[11px] text-muted flex gap-1.5 items-center"><Users size={13} className="shrink-0" />Creators actively delivering for your assigned brand accounts.</p>
       </section>
     </div>
 
     <section>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="eyebrow">Project status</p>
-          <h2 className="text-base font-display font-semibold text-ink">Campaign overview</h2>
+          <p className="eyebrow">Account portfolio</p>
+          <h2 className="text-base font-display font-semibold text-ink">Active campaign status</h2>
         </div>
         <Link href="/campaigns" className="text-xs text-gold hover:underline inline-flex items-center gap-1 font-medium">All campaign details <ArrowRight size={12} /></Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {campaigns.length === 0 ? (
-          <div className="col-span-full card p-7 text-center text-sm text-muted">No campaigns have been shared with you yet.</div>
+          <div className="col-span-full card p-7 text-center text-sm text-muted">No campaigns have been assigned to your accounts yet.</div>
         ) : (
           campaigns.map((campaign) => {
             const done = campaign.deliverables.filter((d) => ["APPROVED", "LIVE"].includes(d.status)).length;

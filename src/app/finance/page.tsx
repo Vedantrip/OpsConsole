@@ -15,7 +15,7 @@ export default async function FinancePage({
   await requireAccess("/finance");
 
   const query = searchParams?.q?.trim() ?? "";
-  const statusFilter = searchParams?.status?.trim() ?? "";
+  const statusFilter = (searchParams?.status?.trim() ?? "").toUpperCase();
 
   const [payouts, invoices] = await Promise.all([
     prisma.payout.findMany({
