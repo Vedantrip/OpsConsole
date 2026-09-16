@@ -18,7 +18,7 @@
   --viz-rose: #B15C67;
   --viz-slate: #52657A;
 
-  --card-shadow: 0 1px 2px rgba(26, 24, 21, 0.04);
+  --card-shadow: 0 4px 12px rgba(26, 24, 21, 0.06), 0 1px 2px rgba(26, 24, 21, 0.04);
 }
 
 :root[data-theme="dark"] {
@@ -29,7 +29,7 @@
   --color-line: #332E27;
   --color-muted: #9E9589;
   --color-panel: #211E1A;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 @tailwind base;
@@ -58,19 +58,20 @@ body {
 .card {
   background-color: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: var(--card-shadow);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
 .card:hover {
-  border-color: #D4CCA8;
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
 }
 
 .glass-card {
   background-color: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: var(--card-shadow);
 }
 
@@ -91,7 +92,7 @@ body {
 .input {
   background-color: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0.5rem 0.75rem;
   color: var(--color-ink);
   width: 100%;
@@ -117,21 +118,26 @@ body {
   justify-content: center;
   gap: 0.5rem;
   background-color: var(--color-gold);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
   color: #FFFFFF;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0.5rem 0.9rem;
   font-weight: 500;
   font-size: 0.875rem;
   border: 1px solid transparent;
-  transition: opacity 150ms ease, transform 100ms ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 150ms ease;
 }
 
 .btn:hover {
   opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .btn:active {
   transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .btn:disabled {
@@ -199,11 +205,12 @@ body {
 }
 
 .table-row {
-  transition: background-color 120ms ease;
+  transition: all 120ms ease;
 }
 
 .table-row:hover {
-  background-color: rgba(204, 154, 61, 0.04);
+  background-color: rgba(204, 154, 61, 0.06);
+  transform: scale(1.002);
 }
 
 /* Color Helpers */
