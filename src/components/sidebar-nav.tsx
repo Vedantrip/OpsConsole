@@ -41,10 +41,10 @@ export default function SidebarNav({ links, mobile = false, unreadMessageCount =
           <Link
             key={link.href}
             href={link.href}
-            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all ${
               active
-                ? "bg-gold/15 text-gold border border-gold/30 font-semibold"
-                : "text-[#9E9589] hover:bg-white/5 hover:text-white"
+                ? "bg-gradient-to-r from-gold/20 to-transparent text-gold border-l-2 border-l-gold font-semibold"
+                : "text-[#9E9589] border-l-2 border-l-transparent hover:bg-white/5 hover:text-white"
             }`}
           >
             <Icon size={16} strokeWidth={active ? 2.25 : 1.75} />
