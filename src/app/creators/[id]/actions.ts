@@ -198,3 +198,32 @@ export async function getAllTags() {
   return tags.map((t) => t.name);
 }
 
+export async function getOrCreateConnectToken(creatorId: string) {
+  await requireAccess("/creators");
+  const context = await requireContext();
+
+  const creator = await prisma.creator.findUnique({
+    where: { id: creatorId, ...creatorScope(context) },
+    select: { id: true, connectToken: true, instagramConnectedAt: true, mountliftScore: true },
+  });
+
+  if (!creator) {
+    throw new Error("Creator not found or access denied.");
+  }
+
+  if (creator.connectToken) {
+    return { token: creator.connectToken };
+  }
+
+  const generatedToken = "ml_" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+
+  await prisma.creator.update({
+    where: { id: creatorId },
+    data: { connectToken: generatedToken },
+  });
+
+  revalidatePath(`/creators/${creatorId}`);
+  return { token: generatedToken };
+}
+
+

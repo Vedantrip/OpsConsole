@@ -58,18 +58,31 @@ model Brand {
 }
 
 model Creator {
-  id                 String                     @id @default(cuid())
-  name               String
-  handle             String?
-  platform           String?
-  email              String?
-  rateCard           String?
-  notes              String?
-  createdAt          DateTime                   @default(now())
-  deliverables       Deliverable[]
-  insights           CreatorInsight[]
-  managerAssignments CreatorManagerAssignment[]
-  posts              Post[]
+  id                    String                     @id @default(cuid())
+  name                  String
+  handle                String?
+  platform              String?
+  email                 String?
+  rateCard              String?
+  notes                 String?
+  connectToken          String?                    @unique
+  instagramAccountId    String?
+  instagramAccessToken  String?
+  tokenExpiresAt        DateTime?
+  instagramConnectedAt  DateTime?
+  mountliftScore        Float?
+  engagementScore       Float?
+  audienceScore         Float?
+  contentScore          Float?
+  consistencyScore      Float?
+  profileScore          Float?
+  scoreCalculatedAt     DateTime?
+  privateInsights       Json?
+  createdAt             DateTime                   @default(now())
+  deliverables          Deliverable[]
+  insights              CreatorInsight[]
+  managerAssignments    CreatorManagerAssignment[]
+  posts                 Post[]
 }
 
 model CreatorManagerAssignment {
