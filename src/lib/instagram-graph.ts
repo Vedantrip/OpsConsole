@@ -1,12 +1,13 @@
 import { buildFullIntelligence } from "./instagram-intelligence";
 
-const META_CLIENT_ID =
-  process.env.META_CLIENT_ID ||
+// Instagram Login has its own Instagram App ID/Secret in Meta's
+// "API setup with Instagram login". These are NOT the general Meta App ID/Secret.
+const INSTAGRAM_APP_ID =
+  process.env.INSTAGRAM_APP_ID ||
   process.env.INSTAGRAM_CLIENT_ID ||
-  process.env.NEXT_PUBLIC_META_CLIENT_ID ||
   "";
-const META_CLIENT_SECRET =
-  process.env.META_CLIENT_SECRET ||
+const INSTAGRAM_APP_SECRET =
+  process.env.INSTAGRAM_APP_SECRET ||
   process.env.INSTAGRAM_CLIENT_SECRET ||
   "";
 
@@ -15,9 +16,9 @@ const INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
 const INSTAGRAM_GRAPH_URL = "https://graph.instagram.com";
 
 function assertMetaConfig() {
-  if (!META_CLIENT_ID || !META_CLIENT_SECRET) {
+  if (!INSTAGRAM_APP_ID || !INSTAGRAM_APP_SECRET) {
     throw new Error(
-      "Meta Instagram OAuth is not configured. Set META_CLIENT_ID and META_CLIENT_SECRET in the server environment."
+      "Instagram Login is not configured. Set INSTAGRAM_APP_ID and INSTAGRAM_APP_SECRET from Meta's 'API setup with Instagram login' page."
     );
   }
 }
@@ -75,7 +76,7 @@ export function getInstagramOAuthUrl(connectToken: string, origin?: string): str
   const scopes = ["instagram_business_basic", "instagram_business_manage_insights"].join(",");
 
   const params = new URLSearchParams({
-    client_id: META_CLIENT_ID,
+    client_id: INSTAGRAM_APP_ID,
     redirect_uri: redirectUri,
     scope: scopes,
     response_type: "code",
@@ -97,8 +98,8 @@ export async function exchangeCodeForToken(
 
   // Step 1: authorization code -> short-lived Instagram access token.
   const form = new URLSearchParams({
-    client_id: META_CLIENT_ID,
-    client_secret: META_CLIENT_SECRET,
+    client_id: INSTAGRAM_APP_ID,
+    client_secret: INSTAGRAM_APP_SECRET,
     grant_type: "authorization_code",
     redirect_uri: redirectUri,
     code,
@@ -124,7 +125,7 @@ export async function exchangeCodeForToken(
   const longRes = await fetch(
     graphUrl("/access_token", {
       grant_type: "ig_exchange_token",
-      client_secret: META_CLIENT_SECRET,
+      client_secret: INSTAGRAM_APP_SECRET,
       access_token: shortData.access_token,
     }),
     { method: "GET", cache: "no-store" }
