@@ -13,6 +13,31 @@ export async function GET(request: NextRequest) {
 
   const origin = request.nextUrl.origin;
 
+  // Meta's webhook validator calls this same callback URL with hub.* query
+  // parameters. Handle verification before OAuth processing.
+  const hubMode = searchParams.get("hub.mode");
+  const hubVerifyToken = searchParams.get("hub.verify_token");
+  const hubChallenge = searchParams.get("hub.challenge");
+
+  if (hubMode === "subscribe") {
+    const expectedVerifyToken = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN;
+
+    if (!expectedVerifyToken) {
+      console.error("Instagram webhook verification failed: INSTAGRAM_WEBHOOK_VERIFY_TOKEN is not configured.");
+      return new Response("Webhook verify token is not configured.", { status: 500 });
+    }
+
+    if (hubVerifyToken !== expectedVerifyToken) {
+      console.warn("Instagram webhook verification failed: invalid verify token.");
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    return new Response(hubChallenge || "", {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   if (errorParam || !code || !connectToken) {
     const errorMsg = encodeURIComponent(errorDescription || errorParam || "Authentication was cancelled or failed.");
     const redirectTarget = connectToken ? `${origin}/portal/${connectToken}?error=${errorMsg}` : `${origin}/?error=${errorMsg}`;
