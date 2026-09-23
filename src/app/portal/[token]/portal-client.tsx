@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   ExternalLink,
 } from "lucide-react";
+import AITrendingHub from "@/components/content/ai-trending-hub";
 import {
   BarChart,
   Bar,
@@ -399,6 +400,14 @@ export default function PortalClient({
                 </div>
               </div>
             )}
+
+            {/* Daily AI Trending Content Sparks */}
+            <div className="pt-2">
+              <AITrendingHub
+                creatorId={creator.id}
+                creatorName={creator.name}
+              />
+            </div>
           </div>
         )}
       </main>

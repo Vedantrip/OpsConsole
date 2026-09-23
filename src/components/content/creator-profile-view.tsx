@@ -8,6 +8,7 @@ import DemographicsAggregate from "../demographics/demographics-aggregate";
 import CrossAnalysisMatrix from "../demographics/cross-analysis-matrix";
 import PostDemographicsModal from "../demographics/post-demographics-modal";
 import PostFormModal from "./post-form-modal";
+import AITrendingHub from "./ai-trending-hub";
 import {
   Layers,
   Sparkles,
@@ -26,6 +27,7 @@ import {
   Activity,
   Award,
   Link2,
+  Flame,
 } from "lucide-react";
 import { getOrCreateConnectToken } from "@/app/creators/[id]/actions";
 
@@ -61,7 +63,7 @@ export default function CreatorProfileView({
   computedInsights,
   existingTags,
 }: CreatorProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<"content" | "insights" | "demographics" | "audit">("content");
+  const [activeTab, setActiveTab] = useState<"content" | "insights" | "demographics" | "audit" | "trends">("content");
   const [selectedPostForDemo, setSelectedPostForDemo] = useState<PostWithRelations | null>(null);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -326,6 +328,21 @@ export default function CreatorProfileView({
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab("trends")}
+            className={`flex items-center gap-2 py-3 px-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === "trends"
+                ? "border-gold text-ink font-semibold"
+                : "border-transparent text-muted hover:text-ink"
+            }`}
+          >
+            <Flame size={14} className="text-orange-500" />
+            <span>AI Trend Sparks</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 font-bold">
+              HOT
+            </span>
+          </button>
         </div>
 
         <button
@@ -432,6 +449,16 @@ export default function CreatorProfileView({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab 5: AI Trending Content Sparks */}
+      {activeTab === "trends" && (
+        <div className="space-y-6">
+          <AITrendingHub
+            creatorId={creator.id}
+            creatorName={creator.name}
+          />
         </div>
       )}
 

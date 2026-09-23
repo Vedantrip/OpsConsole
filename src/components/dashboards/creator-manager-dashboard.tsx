@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, CalendarDays, ChevronRight, Clapperboard, Clock3, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireContext, creatorScope } from "@/lib/access";
+import AITrendingHub from "@/components/content/ai-trending-hub";
 
 const statusStyles = {
   PLANNED: "border-line bg-paper text-muted",
@@ -128,6 +129,11 @@ export default async function CreatorManagerDashboard() {
           lift
         />
       </div>
+
+      {/* Daily AI Trending Topics Radar */}
+      <section className="space-y-3">
+        <AITrendingHub />
+      </section>
 
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4">
