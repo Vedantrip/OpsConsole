@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { PostWithRelations, computeEngagementRate } from "@/lib/types/content";
 import { ContentFormat } from "@prisma/client";
-import { Grid, Layers, Tag, HelpCircle } from "lucide-react";
+import { Grid, Tag, HelpCircle } from "lucide-react";
 
 interface CrossAnalysisMatrixProps {
   posts: PostWithRelations[];
