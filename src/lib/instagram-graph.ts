@@ -61,6 +61,12 @@ export function getBaseAppUrl(origin?: string): string {
   return "http://localhost:3000";
 }
 
+function getInstagramRedirectUri(origin?: string): string {
+  const configured = process.env.INSTAGRAM_REDIRECT_URI?.trim();
+  if (configured) return configured.replace(/\/$/, "");
+  return `${getBaseAppUrl(origin)}/api/auth/instagram/callback`;
+}
+
 /**
  * Current Instagram API with Instagram Login.
  *
@@ -71,8 +77,7 @@ export function getBaseAppUrl(origin?: string): string {
 export function getInstagramOAuthUrl(connectToken: string, origin?: string): string {
   assertMetaConfig();
 
-  const baseUrl = getBaseAppUrl(origin);
-  const redirectUri = `${baseUrl}/api/auth/instagram/callback`;
+  const redirectUri = getInstagramRedirectUri(origin);
   const scopes = ["instagram_business_basic", "instagram_business_manage_insights"].join(",");
 
   const params = new URLSearchParams({
@@ -93,8 +98,7 @@ export async function exchangeCodeForToken(
 ): Promise<{ accessToken: string; expiresInSeconds: number }> {
   assertMetaConfig();
 
-  const baseUrl = getBaseAppUrl(origin);
-  const redirectUri = `${baseUrl}/api/auth/instagram/callback`;
+  const redirectUri = getInstagramRedirectUri(origin);
 
   // Step 1: authorization code -> short-lived Instagram access token.
   const form = new URLSearchParams({
