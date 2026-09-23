@@ -22,6 +22,18 @@ export async function GET(request: NextRequest) {
   }
 
   const origin = request.nextUrl.origin;
-  const authUrl = getInstagramOAuthUrl(token, origin);
-  return NextResponse.redirect(authUrl);
+
+  try {
+    const authUrl = getInstagramOAuthUrl(token, origin);
+    return NextResponse.redirect(authUrl);
+  } catch (error) {
+    console.error("Instagram OAuth login configuration error:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Instagram Login is not configured on this deployment.";
+    return NextResponse.redirect(
+      `${origin}/portal/${token}?error=${encodeURIComponent(message)}`
+    );
+  }
 }
