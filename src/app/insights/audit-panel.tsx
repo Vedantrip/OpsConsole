@@ -27,9 +27,9 @@ function consistencyColor(label: unknown) {
 }
 
 function scoreTone(score: unknown) {
-  const n = typeof score === "number" ? score : 0;
-  if (n >= 80) return "text-gold";
-  if (n >= 60) return "text-ink";
+  if (typeof score !== "number" || Number.isNaN(score)) return "text-muted";
+  if (score >= 80) return "text-gold";
+  if (score >= 60) return "text-ink";
   return "text-viz-rose";
 }
 
@@ -157,7 +157,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
         setError(`${data.errors.length} creator${data.errors.length === 1 ? "" : "s"} could not be fully analyzed. Completed profiles remain below.`);
       }
     } catch {
-      setError("Couldn't complete the Instagram audit. Apify runs can take a few minutes — retry with fewer handles.");
+      setError("Couldn't complete the Instagram audit. The public Instagram provider may be temporarily unavailable — retry in a moment.");
     } finally {
       setLoading(false);
     }
@@ -254,6 +254,13 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
               const profile = rawObj.profile ?? {};
               const scores = rawObj.scores ?? {};
               const performance = rawObj.performance ?? {};
+              const dataQuality = rawObj.dataQuality ?? {};
+              const audienceAvailable = audience.source !== "unavailable" && (
+                (Array.isArray(audience.gender) && audience.gender.length > 0) ||
+                (Array.isArray(audience.age) && audience.age.length > 0) ||
+                (Array.isArray(audience.locations) && audience.locations.length > 0) ||
+                (Array.isArray(audience.interests) && audience.interests.length > 0)
+              );
 
               return (
                 <div key={handle} className="card p-5 space-y-5">
@@ -279,7 +286,9 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
                     <div className="rounded-xl border border-line bg-paper/60 p-5 flex flex-col items-center justify-center text-center">
                       <div className="text-[10px] uppercase tracking-[0.18em] text-muted font-mono font-medium">MountLift Score</div>
                       <div className={`text-5xl font-display font-bold mt-2 stat-number ${scoreTone(scores.overall)}`}>{formatScore(scores.overall)}</div>
-                      <div className="text-[10px] text-muted mt-2">Proprietary evaluation · v1</div>
+                      <div className="text-[10px] text-muted mt-2">
+                        {dataQuality.status === "profile_only" ? "Withheld · no public reels returned" : scores.note || "Proprietary evaluation · v1"}
+                      </div>
                       <div className="grid grid-cols-2 gap-2 mt-4 w-full text-left">
                         {[["Engagement", scores.engagement], ["Audience", scores.audience], ["Content", scores.content], ["Consistency", scores.consistency], ["Profile", scores.profile]].map(([label, value]) => (
                           <div key={String(label)} className="rounded-md border border-line bg-panel px-2.5 py-1.5 shadow-sm">
@@ -313,7 +322,7 @@ export default function AuditPanel({ creators }: { creators: Creator[] }) {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted font-mono font-medium"><Users size={13} />Audience Intelligence</div><span className="text-[10px] font-mono text-muted">Source: {audience.source || "estimated"} · confidence: {audience.confidence || "medium"}</span></div>
+                    <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted font-mono font-medium"><Users size={13} />Audience Intelligence</div><span className="text-[10px] font-mono text-muted">Source: {audience.source || "unavailable"} · confidence: {audience.confidence || "none"}</span></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                       <Distribution title="Gender" icon={<Users size={12} />} items={audience.gender} />
                       <Distribution title="Age" icon={<BarChart3 size={12} />} items={audience.age} />
