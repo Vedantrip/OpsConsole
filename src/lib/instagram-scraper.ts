@@ -87,9 +87,9 @@ export async function scrapeInstagramData(
 
 async function scrapeViaScrapeDo(username: string, limit: number): Promise<ScrapedProfile> {
   const targetUrl =
-    `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+    `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
-  const attempts = [{ super: false }, { super: true }];
+  const attempts = [{ super: true }];
   let lastError: Error | null = null;
 
   for (const attempt of attempts) {
@@ -100,6 +100,7 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
       // This avoids the mutually-exclusive CustomHeaders/ForwardHeaders modes
       // and keeps Scrape.do's normal browser header management intact.
       extraHeaders: "true",
+      transparentResponse: "true",
       timeout: "60000",
       geoCode: process.env.SCRAPEDO_GEO_CODE || "us",
     });
@@ -140,7 +141,7 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
 }
 
 async function scrapeViaDirectInstagram(username: string, limit: number): Promise<ScrapedProfile> {
-  const targetUrl = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(
+  const targetUrl = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(
     username
   )}`;
 
