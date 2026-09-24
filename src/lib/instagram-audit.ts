@@ -1,5 +1,4 @@
 import ExcelJS from "exceljs";
-import { fetchAudienceForUsername } from "@/lib/instagram-audience";
 import { buildFullIntelligence } from "@/lib/instagram-intelligence";
 import { scrapeInstagramData, ScrapedReel } from "@/lib/instagram-scraper";
 
@@ -157,8 +156,7 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
     }
 
     let performance: ReelMetrics | null = null;
-    let audienceRaw: unknown = null;
-    let scrapedProfile: any = null;
+      let scrapedProfile: any = null;
     const stageErrors: Record<string, string> = {};
 
     try {
@@ -172,20 +170,15 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
       stageErrors.performance = error instanceof Error ? error.message : "Instagram performance analysis failed.";
     }
 
-    if (full) {
-      try {
-        audienceRaw = await fetchAudienceForUsername(handle);
-      } catch (error) {
-        stageErrors.audience = error instanceof Error ? error.message : "Audience analysis failed.";
-      }
-    }
-
-    if (!performance && !audienceRaw) {
-      errors.push({ handle, error: stageErrors.performance || stageErrors.audience || "Instagram audit failed.", stage: "full-analysis" });
+    // Public creator audits no longer invoke the paid HypeBridge/Apify audience actor.
+    // Audience demographics are only available through the separate verified
+    // Instagram Login flow for accounts that authorize MountLift.
+    if (!performance) {
+      errors.push({ handle, error: stageErrors.performance || "Instagram performance analysis failed.", stage: "performance" });
       continue;
     }
 
-    const fullIntelligence = buildFullIntelligence(handle, performance || {}, audienceRaw || {});
+    const fullIntelligence = buildFullIntelligence(handle, performance, {});
     
     // Enrich profile with scraped metadata if available
     if (scrapedProfile) {
