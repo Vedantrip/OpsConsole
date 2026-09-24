@@ -49,20 +49,6 @@ function responseSnippet(text: string) {
   return text.replace(/\s+/g, " ").trim().slice(0, 180);
 }
 
-/**
- * Unified Instagram scraper for public profile/reel data.
- *
- * This route no longer depends on Apify, RapidAPI, or ScraperAPI.
- * Scrape.do is the primary public-data provider and direct Instagram is
- * retained only as a last-resort fallback.
- *
- * Provider order:
- *   1. Scrape.do
- *   2. Direct Instagram web endpoint
- *
- * These providers scrape public data only. Official Instagram Insights for
- * an account the user owns should use the separate Instagram Login/Graph API.
- */
 export async function scrapeInstagramData(
   username: string,
   reelsLimit: number = 12
@@ -85,7 +71,6 @@ export async function scrapeInstagramData(
     errors.push("Scrape.do: SCRAPEDO_TOKEN is not configured.");
   }
 
-  // Direct Instagram is retained only as a last-resort public-data fallback.
   try {
     const data = await scrapeViaDirectInstagram(cleanUsername, reelsLimit);
     if (data && (data.followerCount > 0 || data.reels.length > 0)) return data;
@@ -100,48 +85,35 @@ export async function scrapeInstagramData(
   );
 }
 
-/**
- * Scrape.do provider.
- *
- * Uses Scrape.do's proxy API against Instagram's public web_profile_info
- * endpoint. The request is made through Scrape.do rather than the Vercel
- * function's own IP, which avoids relying on the shared Vercel-origin IP.
- */
 async function scrapeViaScrapeDo(username: string, limit: number): Promise<ScrapedProfile> {
   const targetUrl =
     `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
-  // A 502/ROTATION_FAILED from the datacenter pool is a Scrape.do
-  // proxy-layer failure, not an Instagram response. Automatically retry once
-  // with the residential/mobile pool; failed 502s do not consume credits.
-  const attempts = [
-    { super: false },
-    { super: true },
-  ];
-
+  const attempts = [{ super: false }, { super: true }];
   let lastError: Error | null = null;
 
   for (const attempt of attempts) {
     const params = new URLSearchParams({
       token: SCRAPEDO_TOKEN,
       url: targetUrl,
-      // Scrape.do does not allow customHeaders and forwardHeaders together.
-      // customHeaders gives us control over the browser-like headers below.
-      customHeaders: "true",
+      // IMPORTANT: use Scrape.do's Extra Headers mode.
+      // This avoids the mutually-exclusive CustomHeaders/ForwardHeaders modes
+      // and keeps Scrape.do's normal browser header management intact.
+      extraHeaders: "true",
       timeout: "60000",
+      geoCode: process.env.SCRAPEDO_GEO_CODE || "us",
     });
 
     if (attempt.super) params.set("super", "true");
-    params.set("geoCode", process.env.SCRAPEDO_GEO_CODE || "us");
 
     const response = await fetch(`https://api.scrape.do/?${params.toString()}`, {
       method: "GET",
       headers: {
-        "x-ig-app-id": "936619743392459",
-        "User-Agent":
+        "Sd-x-ig-app-id": "936619743392459",
+        "Sd-User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        Accept: "application/json,text/plain,*/*",
-        "Accept-Language": "en-US,en;q=0.9",
+        "Sd-Accept": "application/json,text/plain,*/*",
+        "Sd-Accept-Language": "en-US,en;q=0.9",
       },
       signal: AbortSignal.timeout(70_000),
       cache: "no-store",
@@ -167,13 +139,6 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
   throw lastError || new Error("Scrape.do failed.");
 }
 
-/**
- * Direct Instagram web endpoint.
- *
- * This is deliberately a last resort because Vercel/shared cloud IPs can
- * receive 429s from Instagram. We retry only a small number of times and
- * honor Retry-After when Instagram provides it.
- */
 async function scrapeViaDirectInstagram(username: string, limit: number): Promise<ScrapedProfile> {
   const targetUrl = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(
     username
