@@ -17,18 +17,20 @@ export type ScrapedProfile = {
   biography: string;
   followerCount: number;
   followingCount: number;
+  postsCount?: number;
   isVerified: boolean;
   profilePicUrl?: string;
+  category?: string | null;
+  externalUrl?: string | null;
   reels: ScrapedReel[];
-  source: "scrapedo" | "instagram_direct";
+  source: "instagram_api" | "scrapedo" | "instagram_direct";
+  dataQuality?: "complete" | "profile_only" | "insufficient";
 };
 
+const INSTAGRAM_API_KEY = process.env.INSTAGRAM_API_KEY || "";
+const INSTAGRAM_API_BASE_URL = "https://api.instagramapi.dev/v1";
 const SCRAPEDO_TOKEN = process.env.SCRAPEDO_TOKEN || process.env.SCRAPE_DO_TOKEN || "";
 
-// Instagram rolled the desktop web_profile_info surface behind a login wall in September 2026.
-// The Android in-app WebView identity is currently the public identity that still works for
-// this endpoint. Keep these configurable so Instagram changes can be handled without another
-// scraper rewrite.
 const INSTAGRAM_PROFILE_APP_ID =
   process.env.INSTAGRAM_PROFILE_APP_ID || "3419628305025917";
 const INSTAGRAM_PROFILE_USER_AGENT =
@@ -37,7 +39,6 @@ const INSTAGRAM_PROFILE_USER_AGENT =
 
 const REQUEST_TIMEOUT_MS = 20_000;
 const DIRECT_RETRY_ATTEMPTS = 2;
-const SCRAPEDO_RETRY_ATTEMPTS = 3;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -60,6 +61,114 @@ function responseSnippet(text: string) {
   return text.replace(/\s+/g, " ").trim().slice(0, 180);
 }
 
+function normalizeApiError(status: number, body: any) {
+  const code = body?.error?.code || body?.code || body?.error_code;
+  const message = body?.error?.message || body?.message || body?.error;
+  return code ? `${code}${message ? `: ${message}` : ""}` : `HTTP ${status}`;
+}
+
+function apiHeaders() {
+  return {
+    Authorization: `Bearer ${INSTAGRAM_API_KEY}`,
+    Accept: "application/json",
+  };
+}
+
+async function fetchInstagramApiJson(path: string, handle: string) {
+  const url = `${INSTAGRAM_API_BASE_URL}${path}?handle=${encodeURIComponent(handle)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: apiHeaders(),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    next: { revalidate: 21_600 },
+  });
+
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(`Instagram API ${normalizeApiError(response.status, body)}`);
+    (error as any).status = response.status;
+    (error as any).code = body?.error?.code || body?.code;
+    throw error;
+  }
+
+  return body;
+}
+
+function parseInstagramApiProfile(username: string, json: any): Omit<ScrapedProfile, "reels" | "source" | "dataQuality"> {
+  const profile = json?.data || {};
+  return {
+    username: String(profile.username || username),
+    fullName: String(profile.full_name || profile.username || username),
+    biography: String(profile.biography || ""),
+    followerCount: Number(profile.followers) || 0,
+    followingCount: Number(profile.following) || 0,
+    postsCount: Number(profile.posts) || 0,
+    isVerified: Boolean(profile.is_verified),
+    profilePicUrl: profile.profile_pic_url || undefined,
+    category: profile.category ?? null,
+    externalUrl: profile.external_url ?? null,
+  };
+}
+
+function parseInstagramApiReels(username: string, json: any, limit: number): ScrapedReel[] {
+  const items = Array.isArray(json?.data?.items) ? json.data.items : [];
+  return items.slice(0, limit).map((item: any) => ({
+    shortCode: item?.shortcode || undefined,
+    url: item?.url || (item?.shortcode ? `https://www.instagram.com/p/${item.shortcode}/` : undefined),
+    caption: item?.caption || "",
+    timestamp: item?.taken_at || undefined,
+    videoPlayCount: typeof item?.view_count === "number" ? item.view_count : undefined,
+    videoViewCount: typeof item?.view_count === "number" ? item.view_count : undefined,
+    likesCount: typeof item?.like_count === "number" ? item.like_count : undefined,
+    commentsCount: typeof item?.comment_count === "number" ? item.comment_count : undefined,
+    isVideo: item?.type === "video" || item?.product_type === "clips" || item?.video_url != null,
+    inputUrl: username ? `https://www.instagram.com/${username}/` : undefined,
+  }));
+}
+
+async function scrapeViaInstagramApi(username: string, limit: number): Promise<ScrapedProfile> {
+  const [profileResult, reelsResult] = await Promise.allSettled([
+    fetchInstagramApiJson("/profile", username),
+    fetchInstagramApiJson("/profile/reels", username),
+  ]);
+
+  const profileError = profileResult.status === "rejected" ? profileResult.reason : null;
+  const reelsError = reelsResult.status === "rejected" ? reelsResult.reason : null;
+
+  if (profileResult.status === "rejected" && reelsResult.status === "rejected") {
+    throw new Error(
+      `Profile: ${profileError instanceof Error ? profileError.message : String(profileError)}; Reels: ${reelsError instanceof Error ? reelsError.message : String(reelsError)}`
+    );
+  }
+
+  const profile = profileResult.status === "fulfilled"
+    ? parseInstagramApiProfile(username, profileResult.value)
+    : {
+        username,
+        fullName: username,
+        biography: "",
+        followerCount: 0,
+        followingCount: 0,
+        postsCount: 0,
+        isVerified: false,
+      };
+
+  const reels = reelsResult.status === "fulfilled"
+    ? parseInstagramApiReels(username, reelsResult.value, limit)
+    : [];
+
+  if (reelsResult.status === "rejected" && profileResult.status === "fulfilled") {
+    console.warn("[Instagram API] Reels endpoint failed; returning profile-only data:", reelsError);
+  }
+
+  return {
+    ...profile,
+    reels,
+    source: "instagram_api",
+    dataQuality: reels.length > 0 ? "complete" : "profile_only",
+  };
+}
+
 export async function scrapeInstagramData(
   username: string,
   reelsLimit: number = 12
@@ -69,30 +178,44 @@ export async function scrapeInstagramData(
 
   const errors: string[] = [];
 
-  if (SCRAPEDO_TOKEN) {
+  // Primary provider. Profile + reels are fetched concurrently for latency, but each
+  // endpoint is independently cached for 6 hours by Next's data cache.
+  if (INSTAGRAM_API_KEY) {
     try {
-      const data = await scrapeViaScrapeDo(cleanUsername, reelsLimit);
-      if (data && (data.followerCount > 0 || data.reels.length > 0)) return data;
-      errors.push("Scrape.do: response did not contain usable profile/reel data.");
+      return await scrapeViaInstagramApi(cleanUsername, reelsLimit);
     } catch (err: any) {
-      console.warn("[Scraper] Scrape.do failed:", err?.message || err);
-      errors.push(`Scrape.do: ${err?.message || err}`);
+      console.warn("[Instagram API] Primary provider failed:", err?.message || err);
+      errors.push(`Instagram API: ${err?.message || err}`);
     }
   } else {
-    errors.push("Scrape.do: SCRAPEDO_TOKEN is not configured.");
+    errors.push("Instagram API: INSTAGRAM_API_KEY is not configured.");
   }
 
+  // Free fallback. This is only reached when the primary API cannot return a profile.
   try {
     const data = await scrapeViaDirectInstagram(cleanUsername, reelsLimit);
-    if (data && (data.followerCount > 0 || data.reels.length > 0)) return data;
+    if (data.followerCount > 0 || data.reels.length > 0) return data;
     errors.push("DirectAPI: response did not contain usable profile/reel data.");
   } catch (err: any) {
     console.warn("[Scraper] Direct Web API failed:", err?.message || err);
     errors.push(`DirectAPI: ${err?.message || err}`);
   }
 
+  // Paid emergency fallback. Keep this to one request: retries here can burn credits
+  // without improving the audit enough to justify the cost.
+  if (SCRAPEDO_TOKEN) {
+    try {
+      const data = await scrapeViaScrapeDo(cleanUsername, reelsLimit);
+      if (data.followerCount > 0 || data.reels.length > 0) return data;
+      errors.push("Scrape.do: response did not contain usable profile/reel data.");
+    } catch (err: any) {
+      console.warn("[Scraper] Scrape.do emergency fallback failed:", err?.message || err);
+      errors.push(`Scrape.do: ${err?.message || err}`);
+    }
+  }
+
   throw new Error(
-    `All Instagram scraping providers failed for @${cleanUsername}. Errors: ${errors.join("; ")}`
+    `All Instagram providers failed for @${cleanUsername}. Errors: ${errors.join("; ")}`
   );
 }
 
@@ -100,55 +223,36 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
   const targetUrl =
     `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
-  const attempts = Array.from({ length: SCRAPEDO_RETRY_ATTEMPTS }, (_, index) => ({ super: true, index }));
-  let lastError: Error | null = null;
+  const params = new URLSearchParams({
+    token: SCRAPEDO_TOKEN,
+    url: targetUrl,
+    extraHeaders: "true",
+    transparentResponse: "true",
+    timeout: "60000",
+    geoCode: process.env.SCRAPEDO_GEO_CODE || "us",
+  });
 
-  for (const attempt of attempts) {
-    const params = new URLSearchParams({
-      token: SCRAPEDO_TOKEN,
-      url: targetUrl,
-      // IMPORTANT: use Scrape.do's Extra Headers mode.
-      // This avoids the mutually-exclusive CustomHeaders/ForwardHeaders modes
-      // and keeps Scrape.do's normal browser header management intact.
-      extraHeaders: "true",
-      transparentResponse: "true",
-      timeout: "60000",
-      geoCode: process.env.SCRAPEDO_GEO_CODE || "us",
-    });
+  const response = await fetch(`https://api.scrape.do/?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Sd-x-ig-app-id": INSTAGRAM_PROFILE_APP_ID,
+      "Sd-User-Agent": INSTAGRAM_PROFILE_USER_AGENT,
+      "Sd-Accept": "application/json,text/plain,*/*",
+      "Sd-Accept-Language": "en-US,en;q=0.9",
+    },
+    signal: AbortSignal.timeout(70_000),
+    cache: "no-store",
+  });
 
-    if (attempt.super) params.set("super", "true");
-
-    const response = await fetch(`https://api.scrape.do/?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        "Sd-x-ig-app-id": INSTAGRAM_PROFILE_APP_ID,
-        "Sd-User-Agent": INSTAGRAM_PROFILE_USER_AGENT,
-        "Sd-Accept": "application/json,text/plain,*/*",
-        "Sd-Accept-Language": "en-US,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(70_000),
-      cache: "no-store",
-    });
-
-    if (response.ok) {
-      const json = await response.json();
-      return parseInstagramWebProfileJson(username, json, limit, "scrapedo");
-    }
-
-    const body = await response.text().catch(() => "");
-    lastError = new Error(
-      `Scrape.do responded with status ${response.status}${body ? `: ${responseSnippet(body)}` : ""}`
-    );
-
-    if (attempt.index < SCRAPEDO_RETRY_ATTEMPTS - 1 && (response.status === 400 || response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504)) {
-      await sleep(1200 * (attempt.index + 1));
-      continue;
-    }
-
-    break;
+  if (response.ok) {
+    const json = await response.json();
+    return parseInstagramWebProfileJson(username, json, limit, "scrapedo");
   }
 
-  throw lastError || new Error("Scrape.do failed.");
+  const body = await response.text().catch(() => "");
+  throw new Error(
+    `Scrape.do responded with status ${response.status}${body ? `: ${responseSnippet(body)}` : ""}`
+  );
 }
 
 async function scrapeViaDirectInstagram(username: string, limit: number): Promise<ScrapedProfile> {
@@ -234,9 +338,11 @@ function parseInstagramWebProfileJson(
     biography: user.biography || "",
     followerCount: Number(user.edge_followed_by?.count) || 0,
     followingCount: Number(user.edge_follow?.count) || 0,
+    postsCount: Number(user.edge_owner_to_timeline_media?.count) || 0,
     isVerified: Boolean(user.is_verified),
     profilePicUrl: user.profile_pic_url_hd || user.profile_pic_url,
     reels,
     source,
+    dataQuality: reels.length > 0 ? "complete" : "profile_only",
   };
 }
