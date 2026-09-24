@@ -27,7 +27,6 @@ const SCRAPEDO_TOKEN = process.env.SCRAPEDO_TOKEN || process.env.SCRAPE_DO_TOKEN
 
 const REQUEST_TIMEOUT_MS = 20_000;
 const DIRECT_RETRY_ATTEMPTS = 1;
-const RAPID_RETRY_ATTEMPTS = 2;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -101,13 +100,13 @@ export async function scrapeInstagramData(
   );
 }
 
-  /**
-   * Scrape.do provider.
-   *
-   * Uses Scrape.do's proxy API against Instagram's public web_profile_info
-   * endpoint. The request is made through Scrape.do rather than the Vercel
-   * function's own IP, which avoids relying on the shared Vercel-origin IP.
-   */
+/**
+ * Scrape.do provider.
+ *
+ * Uses Scrape.do's proxy API against Instagram's public web_profile_info
+ * endpoint. The request is made through Scrape.do rather than the Vercel
+ * function's own IP, which avoids relying on the shared Vercel-origin IP.
+ */
 async function scrapeViaScrapeDo(username: string, limit: number): Promise<ScrapedProfile> {
   const targetUrl =
     `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
@@ -126,8 +125,9 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
     const params = new URLSearchParams({
       token: SCRAPEDO_TOKEN,
       url: targetUrl,
+      // Scrape.do does not allow customHeaders and forwardHeaders together.
+      // customHeaders gives us control over the browser-like headers below.
       customHeaders: "true",
-      forwardHeaders: "true",
       timeout: "60000",
     });
 
