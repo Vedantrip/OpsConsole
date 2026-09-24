@@ -22,11 +22,11 @@ export default async function InsightsPage() {
           <h1 className="text-2xl font-display font-bold tracking-tight">Analytics & Insights</h1>
         </div>
         <p className="text-sm text-muted">
-          Creator intelligence from public Instagram reel performance signals.
+          Creator intelligence from public Instagram profile and reel performance signals.
         </p>
         <div className="mt-3 max-w-3xl rounded-xl border border-gold/20 bg-gold/5 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
           <span className="font-semibold text-ink">Public performance data.</span>{" "}
-          Metrics are calculated from recent public reels through MountLift's public-data scraper. This is not official Instagram Insights or authenticated audience data.
+          Metrics are calculated from recent public reels through MountLift's public Instagram data provider. This is not official Instagram Insights or authenticated audience data. Audience demographics remain unavailable unless a creator authorizes MountLift through Instagram Login.
         </div>
       </div>
 
