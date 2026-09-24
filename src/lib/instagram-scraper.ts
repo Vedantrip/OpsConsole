@@ -112,9 +112,12 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
   const targetUrl =
     `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
+  // A 502/ROTATION_FAILED from the datacenter pool is a Scrape.do
+  // proxy-layer failure, not an Instagram response. Automatically retry once
+  // with the residential/mobile pool; failed 502s do not consume credits.
   const attempts = [
     { super: false },
-    ...(process.env.SCRAPEDO_SUPER === "true" ? [{ super: true }] : []),
+    { super: true },
   ];
 
   let lastError: Error | null = null;
@@ -124,13 +127,12 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
       token: SCRAPEDO_TOKEN,
       url: targetUrl,
       customHeaders: "true",
+      forwardHeaders: "true",
       timeout: "60000",
     });
 
     if (attempt.super) params.set("super", "true");
-    if (process.env.SCRAPEDO_GEO_CODE) {
-      params.set("geoCode", process.env.SCRAPEDO_GEO_CODE);
-    }
+    params.set("geoCode", process.env.SCRAPEDO_GEO_CODE || "us");
 
     const response = await fetch(`https://api.scrape.do/?${params.toString()}`, {
       method: "GET",
