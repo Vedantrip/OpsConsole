@@ -25,6 +25,16 @@ export type ScrapedProfile = {
 
 const SCRAPEDO_TOKEN = process.env.SCRAPEDO_TOKEN || process.env.SCRAPE_DO_TOKEN || "";
 
+// Instagram rolled the desktop web_profile_info surface behind a login wall in September 2026.
+// The Android in-app WebView identity is currently the public identity that still works for
+// this endpoint. Keep these configurable so Instagram changes can be handled without another
+// scraper rewrite.
+const INSTAGRAM_PROFILE_APP_ID =
+  process.env.INSTAGRAM_PROFILE_APP_ID || "3419628305025917";
+const INSTAGRAM_PROFILE_USER_AGENT =
+  process.env.INSTAGRAM_PROFILE_USER_AGENT ||
+  "Mozilla/5.0 (Linux; Android 14; SM-S921B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.0.0 Mobile Safari/537.36 Instagram 340.0.0.36.90 Android (34/14; 480dpi; 1080x2340; samsung; SM-S921B; e1s; s5e9945; en_US; 629151101)";
+
 const REQUEST_TIMEOUT_MS = 20_000;
 const DIRECT_RETRY_ATTEMPTS = 1;
 
@@ -110,9 +120,8 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
     const response = await fetch(`https://api.scrape.do/?${params.toString()}`, {
       method: "GET",
       headers: {
-        "Sd-x-ig-app-id": "936619743392459",
-        "Sd-User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Sd-x-ig-app-id": INSTAGRAM_PROFILE_APP_ID,
+        "Sd-User-Agent": INSTAGRAM_PROFILE_USER_AGENT,
         "Sd-Accept": "application/json,text/plain,*/*",
         "Sd-Accept-Language": "en-US,en;q=0.9",
       },
@@ -152,9 +161,8 @@ async function scrapeViaDirectInstagram(username: string, limit: number): Promis
       const response = await fetch(targetUrl, {
         method: "GET",
         headers: {
-          "x-ig-app-id": "936619743392459",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          "x-ig-app-id": INSTAGRAM_PROFILE_APP_ID,
+          "User-Agent": INSTAGRAM_PROFILE_USER_AGENT,
           Accept: "application/json,text/plain,*/*",
           "Accept-Language": "en-US,en;q=0.9",
           "Sec-Fetch-Mode": "cors",
