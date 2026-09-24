@@ -26,7 +26,7 @@ export default async function InsightsPage() {
         </p>
         <div className="mt-3 max-w-3xl rounded-xl border border-gold/20 bg-gold/5 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
           <span className="font-semibold text-ink">Public performance data.</span>{" "}
-          Metrics are calculated from recent public reels through Apify. This is not official Instagram Insights or authenticated audience data.
+          Metrics are calculated from recent public reels through MountLift's public-data scraper. This is not official Instagram Insights or authenticated audience data.
         </div>
       </div>
 
