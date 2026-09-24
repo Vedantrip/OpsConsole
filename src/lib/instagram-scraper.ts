@@ -49,7 +49,7 @@ function retryAfterMs(response: Response, fallbackMs: number) {
 }
 
 function responseSnippet(text: string) {
-  return text.replace(/\\s+/g, " ").trim().slice(0, 180);
+  return text.replace(/\s+/g, " ").trim().slice(0, 180);
 }
 
 /**
@@ -217,8 +217,8 @@ function parseRapidApiResponse(username: string, json: any, limit: number): Scra
                 : node.timestamp
             ).toISOString()
           : undefined,
-        videoPlayCount: typeof views === "number" ? views : null,
-        videoViewCount: typeof views === "number" ? views : null,
+        videoPlayCount: typeof views === "number" ? views : undefined,
+        videoViewCount: typeof views === "number" ? views : undefined,
         likesCount: Number(likes) || 0,
         commentsCount: Number(comments) || 0,
         isVideo: Boolean(node?.is_video || views != null),
