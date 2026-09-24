@@ -44,6 +44,12 @@ type FullResult = ReelMetrics & {
   profile: any;
   performance: any;
   rawAudience?: unknown;
+  dataQuality?: {
+    status: "complete" | "profile_only" | "insufficient";
+    provider?: string;
+    reelsAnalyzed: number;
+    message?: string;
+  };
   errors?: Record<string, string>;
 };
 
@@ -170,33 +176,64 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
       stageErrors.performance = error instanceof Error ? error.message : "Instagram performance analysis failed.";
     }
 
-    // Public creator audits no longer invoke the paid HypeBridge/Apify audience actor.
-    // Audience demographics are only available through the separate verified
-    // Instagram Login flow for accounts that authorize MountLift.
+    // Public creator audits do not have authenticated audience demographics.
+    // Those are reserved for creators who authorize MountLift through Instagram Login.
     if (!performance) {
       errors.push({ handle, error: stageErrors.performance || "Instagram performance analysis failed.", stage: "performance" });
       continue;
     }
 
+    const hasPerformanceData = performance.reelsAnalyzed > 0;
     const fullIntelligence = buildFullIntelligence(handle, performance, {});
     
-    // Enrich profile with scraped metadata if available
+    // Enrich profile with provider metadata.
     if (scrapedProfile) {
       if (scrapedProfile.fullName) fullIntelligence.profile.fullName = scrapedProfile.fullName;
       if (scrapedProfile.biography) fullIntelligence.profile.biography = scrapedProfile.biography;
-      if (scrapedProfile.followerCount) fullIntelligence.profile.followers = scrapedProfile.followerCount;
+      if (scrapedProfile.followerCount > 0) fullIntelligence.profile.followers = scrapedProfile.followerCount;
+      if (scrapedProfile.followingCount > 0) fullIntelligence.profile.following = scrapedProfile.followingCount;
+      if (scrapedProfile.postsCount > 0) fullIntelligence.profile.posts = scrapedProfile.postsCount;
       if (scrapedProfile.isVerified) fullIntelligence.profile.isVerified = scrapedProfile.isVerified;
       if (scrapedProfile.profilePicUrl) fullIntelligence.profile.profilePicUrl = scrapedProfile.profilePicUrl;
+      if (scrapedProfile.externalUrl) fullIntelligence.profile.profileUrl = scrapedProfile.externalUrl;
     }
+
+    const dataQuality = {
+      status: hasPerformanceData ? "complete" as const : "profile_only" as const,
+      provider: scrapedProfile?.source,
+      reelsAnalyzed: performance.reelsAnalyzed,
+      message: hasPerformanceData
+        ? undefined
+        : "Public profile data was available, but no public reels were returned. Performance scores are withheld rather than estimated.",
+    };
 
     const result: FullResult = {
       ...fullIntelligence,
       ...((performance || {}) as any),
       profile: fullIntelligence.profile,
       performance: fullIntelligence.performance,
-      audience: fullIntelligence.audience,
-      scores: fullIntelligence.scores,
+      audience: {
+        ...fullIntelligence.audience,
+        source: "unavailable",
+        label: "Audience Intelligence · Not available from public data",
+        confidence: "none",
+        gender: [],
+        age: [],
+        locations: [],
+        interests: [],
+      },
+      scores: hasPerformanceData ? fullIntelligence.scores : {
+        engagement: null,
+        audience: null,
+        content: null,
+        consistency: null,
+        profile: null,
+        overall: null,
+        methodology: "MountLift proprietary v1",
+        weights: { engagement: 0.3, audience: 0.25, content: 0.2, consistency: 0.15, profile: 0.1 },
+      },
       rawAudience: fullIntelligence.rawAudience,
+      dataQuality,
       errors: stageErrors,
     };
     results.push(result);
@@ -214,6 +251,10 @@ export function toInsightsResult(result: FullResult) {
     scores: result.scores,
     rawAudience: result.rawAudience,
     reels: result.perReel || [],
+    dataQuality: result.dataQuality || {
+      status: result.reelsAnalyzed > 0 ? "complete" : "profile_only",
+      reelsAnalyzed: result.reelsAnalyzed,
+    },
     errors: result.errors || {},
   };
 }
