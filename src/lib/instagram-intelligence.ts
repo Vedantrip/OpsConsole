@@ -64,13 +64,14 @@ function clamp(value: number, min = 0, max = 100) {
 
 function engagementScore(performance: any) {
   const rate = Number(performance?.engagementRate);
-  return Number.isFinite(rate) ? clamp((rate / 8) * 100) : 50;
+  return Number.isFinite(rate) ? clamp((rate / 8) * 100) : null;
 }
 
 function audienceScore(audience: any) {
-  const confidence = String(audience?.confidence || "medium").toLowerCase();
   const signalCount = [audience?.gender, audience?.age, audience?.locations, audience?.interests]
     .filter((value) => Array.isArray(value) && value.length > 0).length;
+  if (signalCount === 0) return null;
+  const confidence = String(audience?.confidence || "medium").toLowerCase();
   const base = confidence === "high" ? 88 : confidence === "low" ? 52 : 70;
   return clamp(base + signalCount * 3);
 }
@@ -79,11 +80,12 @@ function contentScore(performance: any) {
   const ratio = Number(performance?.viewToFollowerRatio);
   if (Number.isFinite(ratio) && ratio > 0) return clamp((ratio / 0.75) * 100);
   const views = Number(performance?.avgViews);
-  return Number.isFinite(views) && views > 0 ? clamp(55 + Math.log10(views + 1) * 5) : 50;
+  return Number.isFinite(views) && views > 0 ? clamp(55 + Math.log10(views + 1) * 5) : null;
 }
 
 function consistencyScore(performance: any) {
   const label = String(performance?.consistency || "").toLowerCase();
+  if (!label || label === "unknown") return null;
   if (label.includes("very consistent")) return 95;
   if (label === "consistent") return 88;
   if (label.includes("somewhat")) return 68;
@@ -123,10 +125,17 @@ export function normalizeAudience(rawResponse: unknown) {
     ),
   };
 
+  const signalCount = [
+    distribution(root, ["gender", "genderdistribution", "gender_distribution", "audiencegender"]),
+    distribution(root, ["age", "agedistribution", "age_distribution", "audienceage"]),
+    distribution(root, ["locations", "location", "toplocations", "top_locations", "geography", "countries", "cities"]),
+    distribution(root, ["interests", "interest", "audienceinterests", "audience_interests"]),
+  ].filter((items) => items.length > 0).length;
+
   return {
-    source: "estimated",
-    label: "Audience Intelligence · Estimated from public signals",
-    confidence,
+    source: signalCount > 0 ? "estimated" : "unavailable",
+    label: signalCount > 0 ? "Audience Intelligence · Estimated from public signals" : "Audience Intelligence · Not available from public data",
+    confidence: signalCount > 0 ? confidence : "none",
     gender: distribution(root, ["gender", "genderdistribution", "gender_distribution", "audiencegender"]),
     age: distribution(root, ["age", "agedistribution", "age_distribution", "audienceage"]),
     locations: distribution(root, ["locations", "location", "toplocations", "top_locations", "geography", "countries", "cities"]),
@@ -165,13 +174,15 @@ export function buildFullIntelligence(username: string, performance: any, audien
     consistency: consistencyScore(normalizedPerformance),
     profile: profileScore(profile),
   };
-  const overall = Math.round(
-    scoresBase.engagement * 0.3 +
-    scoresBase.audience * 0.25 +
-    scoresBase.content * 0.2 +
-    scoresBase.consistency * 0.15 +
-    scoresBase.profile * 0.1
-  );
+
+  // Public audits do not have authenticated audience demographics. Do not invent an
+  // audience score; normalize the overall score across dimensions that actually exist.
+  const weights = { engagement: 0.3, audience: 0.25, content: 0.2, consistency: 0.15, profile: 0.1 };
+  const available = Object.entries(weights).filter(([key]) => Number.isFinite((scoresBase as any)[key]));
+  const availableWeight = available.reduce((sum, [, weight]) => sum + weight, 0);
+  const overall = availableWeight > 0
+    ? Math.round(available.reduce((sum, [key, weight]) => sum + Number((scoresBase as any)[key]) * weight, 0) / availableWeight)
+    : null;
 
   return {
     username,
@@ -189,9 +200,10 @@ export function buildFullIntelligence(username: string, performance: any, audien
     },
     scores: {
       ...scoresBase,
-      overall: clamp(overall),
+      overall,
       methodology: "MountLift proprietary v1",
       weights: { engagement: 0.3, audience: 0.25, content: 0.2, consistency: 0.15, profile: 0.1 },
+      note: audienceScore(audience) == null ? "Audience dimension excluded because authenticated audience data is unavailable." : undefined,
     },
     rawAudience: audience.raw,
   };
