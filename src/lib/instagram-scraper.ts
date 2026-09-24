@@ -61,8 +61,7 @@ function responseSnippet(text: string) {
  *
  * Provider order:
  *   1. RapidAPI
- *   2. ScraperAPI
- *   3. Direct Instagram web endpoint
+ *   2. Direct Instagram web endpoint
  *
  * These providers scrape public data only. Official Instagram Insights for
  * an account the user owns should use the separate Instagram Login/Graph API.
@@ -89,17 +88,11 @@ export async function scrapeInstagramData(
     errors.push("RapidAPI: RAPIDAPI_KEY is not configured.");
   }
 
+  // ScraperAPI is not used for Instagram anymore. The current ScraperAPI
+  // account explicitly rejects Instagram URLs under its Terms of Use, so
+  // retrying it only adds latency and another guaranteed failure.
   if (SCRAPERAPI_KEY) {
-    try {
-      const data = await scrapeViaScraperApi(cleanUsername, reelsLimit);
-      if (data && (data.followerCount > 0 || data.reels.length > 0)) return data;
-      errors.push("ScraperAPI: response did not contain usable profile/reel data.");
-    } catch (err: any) {
-      console.warn("[Scraper] ScraperAPI failed:", err?.message || err);
-      errors.push(`ScraperAPI: ${err?.message || err}`);
-    }
-  } else {
-    errors.push("ScraperAPI: SCRAPERAPI_KEY is not configured.");
+    console.info("[Scraper] ScraperAPI is configured but skipped for Instagram because the provider rejects this target.");
   }
 
   try {
@@ -125,36 +118,52 @@ export async function scrapeInstagramData(
  * worse. We use the configured host's posts endpoint and retry only 429s.
  */
 async function scrapeViaRapidApi(username: string, limit: number): Promise<ScrapedProfile> {
-  const url = `https://${RAPIDAPI_HOST}/user_posts?username=${encodeURIComponent(username)}`;
+  // The RapidAPI playground for this exact API exposes the endpoint as
+  // "Get User Posts" and accepts handle/max_id. The previous implementation
+  // called /user_posts, which RapidAPI correctly returned as a 404 because
+  // that route does not exist.
+  const endpointCandidates = [
+    "/get_user_posts",
+    "/get_user_posts.php",
+  ];
+
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= RAPID_RETRY_ATTEMPTS; attempt++) {
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key": RAPIDAPI_KEY,
-          "x-rapidapi-host": RAPIDAPI_HOST,
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-        cache: "no-store",
-      });
+  for (const endpoint of endpointCandidates) {
+    const url = `https://${RAPIDAPI_HOST}${endpoint}?handle=${encodeURIComponent(username)}`;
 
-      if (response.ok) {
-        const json = await response.json();
-        return parseRapidApiResponse(username, json, limit);
+    for (let attempt = 0; attempt <= RAPID_RETRY_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key": RAPIDAPI_KEY,
+            "x-rapidapi-host": RAPIDAPI_HOST,
+            Accept: "application/json",
+          },
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+          cache: "no-store",
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          return parseRapidApiResponse(username, json, limit);
+        }
+
+        const body = await response.text().catch(() => "");
+        const message = `RapidAPI responded with status ${response.status} for ${endpoint}${body ? `: ${responseSnippet(body)}` : ""}`;
+        lastError = new Error(message);
+
+        // A 404 means this candidate route is wrong; try the next documented
+        // route shape without wasting retries.
+        if (response.status === 404) break;
+
+        if (response.status !== 429 || attempt === RAPID_RETRY_ATTEMPTS) break;
+        await sleep(retryAfterMs(response, 1500 * (attempt + 1)));
+      } catch (err: any) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        break;
       }
-
-      const body = await response.text().catch(() => "");
-      const message = `RapidAPI responded with status ${response.status}${body ? `: ${responseSnippet(body)}` : ""}`;
-      lastError = new Error(message);
-
-      if (response.status !== 429 || attempt === RAPID_RETRY_ATTEMPTS) break;
-      await sleep(retryAfterMs(response, 1500 * (attempt + 1)));
-    } catch (err: any) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      break;
     }
   }
 
@@ -162,15 +171,18 @@ async function scrapeViaRapidApi(username: string, limit: number): Promise<Scrap
 }
 
 function parseRapidApiResponse(username: string, json: any, limit: number): ScrapedProfile {
-  const user = json?.data?.user || json?.data || json?.user || json?.result || json;
+  const user = json?.data?.user || json?.user || json?.result?.user || json?.data || json?.result || json;
   const rawPosts =
     user?.edge_owner_to_timeline_media?.edges ||
     user?.posts ||
     user?.items ||
     user?.recent_posts ||
+    user?.media ||
     json?.posts ||
     json?.items ||
     json?.data?.items ||
+    json?.data?.posts ||
+    json?.result?.posts ||
     [];
 
   const reels: ScrapedReel[] = (Array.isArray(rawPosts) ? rawPosts : [])
