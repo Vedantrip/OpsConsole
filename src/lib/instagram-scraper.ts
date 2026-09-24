@@ -36,7 +36,8 @@ const INSTAGRAM_PROFILE_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 14; SM-S921B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.0.0 Mobile Safari/537.36 Instagram 340.0.0.36.90 Android (34/14; 480dpi; 1080x2340; samsung; SM-S921B; e1s; s5e9945; en_US; 629151101)";
 
 const REQUEST_TIMEOUT_MS = 20_000;
-const DIRECT_RETRY_ATTEMPTS = 1;
+const DIRECT_RETRY_ATTEMPTS = 2;
+const SCRAPEDO_RETRY_ATTEMPTS = 3;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -99,7 +100,7 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
   const targetUrl =
     `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
-  const attempts = [{ super: true }];
+  const attempts = Array.from({ length: SCRAPEDO_RETRY_ATTEMPTS }, (_, index) => ({ super: true, index }));
   let lastError: Error | null = null;
 
   for (const attempt of attempts) {
@@ -139,7 +140,8 @@ async function scrapeViaScrapeDo(username: string, limit: number): Promise<Scrap
       `Scrape.do responded with status ${response.status}${body ? `: ${responseSnippet(body)}` : ""}`
     );
 
-    if (!attempt.super && (response.status === 403 || response.status === 429 || response.status === 503)) {
+    if (attempt.index < SCRAPEDO_RETRY_ATTEMPTS - 1 && (response.status === 400 || response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504)) {
+      await sleep(1200 * (attempt.index + 1));
       continue;
     }
 
