@@ -109,10 +109,14 @@ export function normalizeAudience(rawResponse: unknown) {
   )).toLowerCase();
 
   const profile = {
+    fullName: (firstDefined(findDeep(root, new Set(["fullname", "full_name", "name"])), null) as string | null) || null,
+    biography: (firstDefined(findDeep(root, new Set(["biography", "bio", "description"])), null) as string | null) || null,
+    profilePicUrl: (firstDefined(findDeep(root, new Set(["profilepicurl", "profile_pic_url", "avatar", "image"])), null) as string | null) || null,
     followers: asNumber(findDeep(root, new Set(["followers", "followercount", "followerscount"]))),
     following: asNumber(findDeep(root, new Set(["following", "followingcount"]))),
     posts: asNumber(findDeep(root, new Set(["posts", "postcount", "media_count"]))),
     verified: Boolean(findDeep(root, new Set(["verified", "isverified"])) ?? false),
+    isVerified: Boolean(findDeep(root, new Set(["verified", "isverified"])) ?? false),
     profileUrl: firstDefined(
       findDeep(root, new Set(["profileurl", "profile_url", "instagramurl", "url"])),
       null

@@ -1,29 +1,11 @@
 import ExcelJS from "exceljs";
 import { fetchAudienceForUsername } from "@/lib/instagram-audience";
 import { buildFullIntelligence } from "@/lib/instagram-intelligence";
+import { scrapeInstagramData, ScrapedReel } from "@/lib/instagram-scraper";
 
-const APIFY_BASE = "https://api.apify.com/v2";
 const DEFAULT_REELS_LIMIT = Number(process.env.DEFAULT_REELS_LIMIT || 12);
-const CONFIGURED_REEL_ACTOR_ID = process.env.APIFY_REEL_ACTOR_ID;
-const LEGACY_ACTOR_ID = process.env.APIFY_ACTOR_ID;
-const DEFAULT_ACTOR_ID =
-  CONFIGURED_REEL_ACTOR_ID && !CONFIGURED_REEL_ACTOR_ID.startsWith("hypebridge~")
-    ? CONFIGURED_REEL_ACTOR_ID
-    : LEGACY_ACTOR_ID && !LEGACY_ACTOR_ID.startsWith("hypebridge~")
-      ? LEGACY_ACTOR_ID
-      : "apify~instagram-reel-scraper";
 
-type RawReel = {
-  shortCode?: string;
-  url?: string;
-  inputUrl?: string;
-  caption?: string;
-  timestamp?: string;
-  videoPlayCount?: number;
-  videoViewCount?: number;
-  likesCount?: number;
-  commentsCount?: number;
-};
+type RawReel = ScrapedReel;
 
 export type ReelMetrics = {
   username: string;
@@ -103,29 +85,10 @@ function consistencyLabel(coefficientOfVariation: number | null) {
 }
 
 export async function fetchReelsForUsername(username: string, limit = DEFAULT_REELS_LIMIT) {
-  const token = process.env.APIFY_API_TOKEN;
-  if (!token) throw new Error("APIFY_API_TOKEN is not set in the environment.");
-
   const cleanUsername = username.trim().replace(/^@/, "");
   if (!cleanUsername) throw new Error("Instagram handle cannot be empty.");
-
-  const actorId = DEFAULT_ACTOR_ID;
-  const input = { username: [cleanUsername], resultsLimit: limit };
-
-  const response = await fetch(`${APIFY_BASE}/acts/${actorId}/run-sync-get-dataset-items?token=${encodeURIComponent(token)}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-    signal: AbortSignal.timeout(280_000),
-  });
-
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    const message = data?.error?.message || data?.message || response.statusText || "Unknown Apify error";
-    throw new Error(`Apify request failed (${response.status}): ${message}`);
-  }
-  if (!Array.isArray(data)) throw new Error("Unexpected response shape from Apify actor");
-  return data as RawReel[];
+  const data = await scrapeInstagramData(cleanUsername, limit);
+  return data.reels;
 }
 
 export function computeMetricsForUsername(username: string, rawReels: RawReel[], followerCount: number | null = null): ReelMetrics {
@@ -195,11 +158,16 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
 
     let performance: ReelMetrics | null = null;
     let audienceRaw: unknown = null;
+    let scrapedProfile: any = null;
     const stageErrors: Record<string, string> = {};
 
     try {
-      const reels = await fetchReelsForUsername(handle, limit);
-      performance = computeMetricsForUsername(handle, reels);
+      scrapedProfile = await scrapeInstagramData(handle, limit);
+      performance = computeMetricsForUsername(
+        handle,
+        scrapedProfile.reels,
+        scrapedProfile.followerCount || null
+      );
     } catch (error) {
       stageErrors.performance = error instanceof Error ? error.message : "Instagram performance analysis failed.";
     }
@@ -218,6 +186,16 @@ export async function analyzeHandles(handles: string[], reelsLimit?: number, opt
     }
 
     const fullIntelligence = buildFullIntelligence(handle, performance || {}, audienceRaw || {});
+    
+    // Enrich profile with scraped metadata if available
+    if (scrapedProfile) {
+      if (scrapedProfile.fullName) fullIntelligence.profile.fullName = scrapedProfile.fullName;
+      if (scrapedProfile.biography) fullIntelligence.profile.biography = scrapedProfile.biography;
+      if (scrapedProfile.followerCount) fullIntelligence.profile.followers = scrapedProfile.followerCount;
+      if (scrapedProfile.isVerified) fullIntelligence.profile.isVerified = scrapedProfile.isVerified;
+      if (scrapedProfile.profilePicUrl) fullIntelligence.profile.profilePicUrl = scrapedProfile.profilePicUrl;
+    }
+
     const result: FullResult = {
       ...fullIntelligence,
       ...((performance || {}) as any),
