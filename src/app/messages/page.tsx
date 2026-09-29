@@ -2,7 +2,7 @@ import Link from "next/link";
 import { clerkClient } from "@clerk/nextjs/server";
 import { LockKeyhole, MessageCircle, Send } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { campaignScope, requireContext } from "@/lib/access";
+import { campaignScope, requireBrandContext, requireContext } from "@/lib/access";
 import { sendCampaignMessage } from "./actions";
 import MessageList from "./message-list";
 import MarkRead from "./mark-read";
@@ -13,8 +13,9 @@ function userDisplayName(user: { firstName: string | null; lastName: string | nu
 
 export default async function MessagesPage({ searchParams }: { searchParams?: { campaign?: string } }) {
   const context = await requireContext();
+  const brandContext = context.role === "BRAND" ? await requireBrandContext() : null;
   const campaigns = await prisma.campaign.findMany({
-    where: campaignScope(context),
+    where: brandContext ? { brandId: brandContext.brand.id } : campaignScope(context),
     orderBy: { createdAt: "desc" },
     include: {
       brand: { select: { name: true } },
