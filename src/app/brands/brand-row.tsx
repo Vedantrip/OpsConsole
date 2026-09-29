@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import DeleteButton from "@/components/delete-button";
-import { acceptBrandTerms, updateBrand, deleteBrand } from "./actions";
+import { acceptBrandTerms, enableBrandPortal, updateBrand, deleteBrand } from "./actions";
 import { BRAND_TERMS_VERSION } from "@/lib/brand-terms";
 
 type Brand = {
@@ -12,6 +12,7 @@ type Brand = {
   contactName: string | null;
   contactEmail: string | null;
   _count: { campaigns: number };
+  portalAccesses: { email: string; createdAt: string }[];
   termsAcceptances: {
     termsVersion: string;
     acceptedAt: string;
@@ -24,6 +25,7 @@ export default function BrandRow({ brand, canManage }: { brand: Brand; canManage
   const [editing, setEditing] = useState(false);
   const acceptance = brand.termsAcceptances[0];
   const termsAccepted = acceptance?.termsVersion === BRAND_TERMS_VERSION;
+  const portalAccess = brand.portalAccesses[0];
 
   if (editing) {
     return (
@@ -85,7 +87,24 @@ export default function BrandRow({ brand, canManage }: { brand: Brand; canManage
         </div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mt-3 pt-3 border-t border-line flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-muted font-semibold">Brand Portal</div>
+            {portalAccess ? (
+              <p className="text-xs text-ink mt-1">Enabled for <span className="font-mono">{portalAccess.email}</span></p>
+            ) : (
+              <p className="text-xs text-muted mt-1">Portal access is not enabled.</p>
+            )}
+          </div>
+          {canManage && !portalAccess && (
+            <form action={async () => { await enableBrandPortal(brand.id); }}>
+              <button className="btn btn-small" type="submit">Enable Brand Portal</button>
+            </form>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="text-[11px] uppercase tracking-wider text-muted font-semibold">Campaign Terms · v{BRAND_TERMS_VERSION}</div>
           {termsAccepted ? (
