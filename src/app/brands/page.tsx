@@ -121,6 +121,7 @@ export default async function BrandsPage({
                 ...b,
                 portalAccesses: b.portalAccesses.map((access) => ({
                   ...access,
+                  createdAt: access.createdAt.toISOString(),
                 })),
                 termsAcceptances: b.termsAcceptances.map((acceptance) => ({
                   ...acceptance,
