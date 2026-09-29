@@ -128,6 +128,7 @@ export default function BrandRow({ brand, canManage }: { brand: Brand; canManage
             </form>
           )}
         </div>
+        </div>
       </div>
     </div>
   );
