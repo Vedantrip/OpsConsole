@@ -28,7 +28,7 @@ export type ScrapedProfile = {
 };
 
 const INSTAGRAM_API_KEY = process.env.INSTAGRAM_API_KEY || "";
-const INSTAGRAM_API_BASE_URL = "https://api.instagramapi.dev/v1";
+const INSTAGRAM_API_BASE_URL = "https://api.profilequery.com/v1";
 const SCRAPEDO_TOKEN = process.env.SCRAPEDO_TOKEN || process.env.SCRAPE_DO_TOKEN || "";
 
 const INSTAGRAM_PROFILE_APP_ID =
