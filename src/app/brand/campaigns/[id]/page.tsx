@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireBrandContext } from "@/lib/access";
+import DeliverableReview from "./deliverable-review";
 
 function statusTone(status: string) {
   if (["ACTIVE", "APPROVED"].includes(status)) return "bg-gold/10 text-gold border-gold/30";
@@ -58,6 +59,8 @@ export default async function BrandCampaignPage({ params }: { params: { id: stri
               <div className="sm:text-right">
                 <span className={`px-2.5 py-1 rounded text-[10px] font-mono border ${statusTone(d.status)}`}>{d.status}</span>
                 <p className="mt-1 text-[11px] text-muted">{d.dueDate ? `Due ${d.dueDate.toLocaleDateString("en-IN")}` : "No deadline set"}</p>
+                {d.brandFeedback && <p className="mt-2 max-w-md text-[11px] text-muted italic">“{d.brandFeedback}”</p>}
+                <div className="mt-3"><DeliverableReview deliverableId={d.id} status={d.status} feedback={d.brandFeedback} /></div>
               </div>
             </div>
           ))}
