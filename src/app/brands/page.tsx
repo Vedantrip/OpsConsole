@@ -33,6 +33,10 @@ export default async function BrandsPage({
           orderBy: { acceptedAt: "desc" },
           take: 1,
         },
+        portalAccesses: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
     }),
     prisma.brand.count({ where: brandScope(context) }),
@@ -115,6 +119,9 @@ export default async function BrandsPage({
               key={b.id}
               brand={{
                 ...b,
+                portalAccesses: b.portalAccesses.map((access) => ({
+                  ...access,
+                })),
                 termsAcceptances: b.termsAcceptances.map((acceptance) => ({
                   ...acceptance,
                   acceptedAt: acceptance.acceptedAt.toISOString(),
