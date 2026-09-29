@@ -27,7 +27,13 @@ export default async function BrandsPage({
     prisma.brand.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
-      include: { _count: { select: { campaigns: true } } },
+      include: {
+        _count: { select: { campaigns: true } },
+        termsAcceptances: {
+          orderBy: { acceptedAt: "desc" },
+          take: 1,
+        },
+      },
     }),
     prisma.brand.count({ where: brandScope(context) }),
     prisma.campaign.count({ where: { brand: brandScope(context) } }),
@@ -71,6 +77,13 @@ export default async function BrandsPage({
       </div>
 
       <div className="card p-5 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted mb-0.5">Brand Terms</h2>
+            <p className="text-xs text-muted">Review the commercial terms and record acceptance for each brand.</p>
+          </div>
+          <Link href="/brand-terms" className="btn btn-small">View Terms</Link>
+        </div>
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted mb-0.5">Add New Brand</h2>
           <p className="text-xs text-muted">
