@@ -1,5 +1,42 @@
 "use server";
 
+import { currentUser } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/access";
+import { BRAND_TERMS_VERSION } from "@/lib/brand-terms";
+import { revalidatePath } from "next/cache";
+
+export async function acceptBrandTerms(brandId: string, accepted: boolean) {
+  const context = await requireAdmin();
+  if (!accepted) return;
+
+  const user = await currentUser();
+
+  await prisma.brandTermsAcceptance.upsert({
+    where: {
+      brandId_termsVersion: {
+        brandId,
+        termsVersion: BRAND_TERMS_VERSION,
+      },
+    },
+    create: {
+      brandId,
+      termsVersion: BRAND_TERMS_VERSION,
+      acceptedByClerkUserId: context.clerkUserId,
+      acceptedByName: user?.fullName ?? user?.firstName ?? null,
+      acceptedByEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+    },
+    update: {
+      acceptedByClerkUserId: context.clerkUserId,
+      acceptedByName: user?.fullName ?? user?.firstName ?? null,
+      acceptedByEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+      acceptedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/brands");
+}
+
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/access";
