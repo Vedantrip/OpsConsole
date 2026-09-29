@@ -278,7 +278,7 @@ model Post {
 
 model PostMetrics {
   id          String   @id @default(cuid())
-  post        Post     @relation(fields: [postId], references: [id])
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId      String   @unique
   views       Int?
   likes       Int?
@@ -292,7 +292,7 @@ model PostMetrics {
 
 model PostDemographics {
   id           String @id @default(cuid())
-  post         Post   @relation(fields: [postId], references: [id])
+  post         Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId       String @unique
   ageRanges    Json
   genderSplit  Json
