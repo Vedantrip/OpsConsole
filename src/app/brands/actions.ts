@@ -2,9 +2,9 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/access";
 import { BRAND_TERMS_VERSION } from "@/lib/brand-terms";
-import { revalidatePath } from "next/cache";
 
 export async function acceptBrandTerms(brandId: string, accepted: boolean) {
   const context = await requireAdmin();
@@ -36,10 +36,6 @@ export async function acceptBrandTerms(brandId: string, accepted: boolean) {
 
   revalidatePath("/brands");
 }
-
-import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/access";
 
 export async function createBrand(formData: FormData) {
   await requireAdmin();
