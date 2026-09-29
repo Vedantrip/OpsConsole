@@ -1,17 +1,17 @@
-export type Role = "ADMIN" | "ACCOUNT_MANAGER" | "CREATOR_MANAGER";
+export type Role = "ADMIN" | "ACCOUNT_MANAGER" | "CREATOR_MANAGER" | "BRAND";
 
 export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Admin",
   ACCOUNT_MANAGER: "Account Manager",
   CREATOR_MANAGER: "Creator Manager",
+  BRAND: "Brand",
 };
 
-// Routes each role is allowed to visit. "/" (dashboard) is allowed for everyone —
-// the dashboard itself renders differently per role instead of being gated.
 const ROLE_ROUTES: Record<Role, string[]> = {
-  ADMIN: ["/", "/creators", "/brands", "/campaigns", "/messages", "/finance", "/insights", "/team"],
+  ADMIN: ["/", "/creators", "/brands", "/campaigns", "/messages", "/finance", "/insights", "/team", "/brand-terms"],
   ACCOUNT_MANAGER: ["/", "/campaigns", "/messages"],
   CREATOR_MANAGER: ["/", "/creators", "/campaigns", "/messages", "/insights"],
+  BRAND: ["/", "/brand-terms", "/brand"],
 };
 
 export function canAccess(role: Role | null, pathname: string): boolean {
@@ -21,8 +21,6 @@ export function canAccess(role: Role | null, pathname: string): boolean {
   );
 }
 
-// Only Admins see dollar figures (budgets, payouts, invoices, profit) for now.
-// If a Finance role gets added later, this is the one place to extend.
 export function canSeeMoney(role: Role | null): boolean {
   return role === "ADMIN";
 }
@@ -38,5 +36,13 @@ export function navLinksForRole(role: Role | null) {
     { href: "/insights", label: "Insights" },
     { href: "/team", label: "Team & Access" },
   ];
+  if (role === "BRAND") {
+    return [
+      { href: "/", label: "Dashboard" },
+      { href: "/brand", label: "Campaigns" },
+      { href: "/messages", label: "Messages" },
+      { href: "/brand-terms", label: "Terms" },
+    ];
+  }
   return all.filter((link) => canAccess(role, link.href));
 }
