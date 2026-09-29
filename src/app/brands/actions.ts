@@ -37,6 +37,21 @@ export async function acceptBrandTerms(brandId: string, accepted: boolean) {
   revalidatePath("/brands");
 }
 
+export async function enableBrandPortal(brandId: string) {
+  await requireAdmin();
+  const brand = await prisma.brand.findUnique({ where: { id: brandId }, select: { contactEmail: true } });
+  const email = brand?.contactEmail?.trim().toLowerCase();
+  if (!email) return { error: "Add the brand's verified contact email before enabling portal access." };
+
+  await prisma.brandPortalAccess.upsert({
+    where: { brandId_email: { brandId, email } },
+    create: { brandId, email },
+    update: {},
+  });
+  revalidatePath("/brands");
+  return { success: true };
+}
+
 export async function createBrand(formData: FormData) {
   await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
