@@ -14,7 +14,7 @@ type Brand = {
   _count: { campaigns: number };
   termsAcceptances: {
     termsVersion: string;
-    acceptedAt: Date;
+    acceptedAt: string;
     acceptedByName: string | null;
     acceptedByEmail: string | null;
   }[];
