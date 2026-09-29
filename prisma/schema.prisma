@@ -231,6 +231,8 @@ model Deliverable {
   status      DeliverableStatus @default(PLANNED)
   dueDate     DateTime?
   liveUrl     String?
+  brandFeedback String?
+  brandReviewedAt DateTime?
   createdAt   DateTime          @default(now())
   payouts     Payout[]
 }
