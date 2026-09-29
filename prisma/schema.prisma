@@ -55,6 +55,21 @@ model Brand {
   campaigns    Campaign[]
   invoices     Invoice[]
   accountManagerAssignments AccountManagerAssignment[]
+  termsAcceptances BrandTermsAcceptance[]
+}
+
+model BrandTermsAcceptance {
+  id                String   @id @default(cuid())
+  brand             Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId           String
+  termsVersion      String
+  acceptedAt        DateTime @default(now())
+  acceptedByClerkUserId String
+  acceptedByName    String?
+  acceptedByEmail   String?
+
+  @@unique([brandId, termsVersion])
+  @@index([brandId, acceptedAt])
 }
 
 model Creator {
@@ -114,8 +129,6 @@ model ManagerUpdate {
   body              String
   createdByClerkId  String
   createdAt         DateTime @default(now())
-
-  @@index([targetClerkUserId, createdAt])
 }
 
 model CreatorInsight {
@@ -135,7 +148,7 @@ model CreatorInsight {
   followingCount       Float?
   postCount            Float?
   verified             Boolean?
-  profileUrl           String?
+  profileUrl            String?
   overallScore         Float?
   engagementScore      Float?
   audienceScore        Float?
@@ -265,7 +278,7 @@ model Post {
 
 model PostMetrics {
   id          String   @id @default(cuid())
-  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post        Post     @relation(fields: [postId], references: [id])
   postId      String   @unique
   views       Int?
   likes       Int?
@@ -279,11 +292,11 @@ model PostMetrics {
 
 model PostDemographics {
   id           String @id @default(cuid())
-  post         Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post         Post   @relation(fields: [postId], references: [id])
   postId       String @unique
-  ageRanges    Json   // { "13-17": 4.2, "18-24": 38.1, "25-34": 35.2, ... } percentages
-  genderSplit  Json   // { "male": 41.2, "female": 57.1, "other": 1.7 }
-  topLocations Json   // [{ "location": "Mumbai", "percentage": 12.4 }, ...]
+  ageRanges    Json
+  genderSplit  Json
+  topLocations Json
 }
 
 model ContentTag {
@@ -291,4 +304,3 @@ model ContentTag {
   name  String @unique
   posts Post[]
 }
-
