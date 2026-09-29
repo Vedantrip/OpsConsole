@@ -56,6 +56,18 @@ model Brand {
   invoices     Invoice[]
   accountManagerAssignments AccountManagerAssignment[]
   termsAcceptances BrandTermsAcceptance[]
+  portalAccesses BrandPortalAccess[]
+}
+
+model BrandPortalAccess {
+  id        String   @id @default(cuid())
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId   String
+  email     String
+  createdAt DateTime @default(now())
+
+  @@unique([brandId, email])
+  @@index([email])
 }
 
 model BrandTermsAcceptance {
