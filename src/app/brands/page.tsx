@@ -110,7 +110,19 @@ export default async function BrandsPage({
             {hasFilter ? "No brands match your search query." : "No brands yet — add one above."}
           </div>
         ) : (
-          brands.map((b) => <BrandRow key={b.id} brand={b} canManage={context.role === "ADMIN"} />)
+          brands.map((b) => (
+            <BrandRow
+              key={b.id}
+              brand={{
+                ...b,
+                termsAcceptances: b.termsAcceptances.map((acceptance) => ({
+                  ...acceptance,
+                  acceptedAt: acceptance.acceptedAt.toISOString(),
+                })),
+              }}
+              canManage={context.role === "ADMIN"}
+            />
+          ))
         )}
       </div>
     </div>
