@@ -1,16 +1,18 @@
-import { Shield, Briefcase, Sparkles } from "lucide-react";
+import { Shield, Briefcase, Sparkles, Building2 } from "lucide-react";
 import { Role } from "@/lib/roles";
 
 const ROLE_ICONS: Record<Role, typeof Shield> = {
   ADMIN: Shield,
   ACCOUNT_MANAGER: Briefcase,
   CREATOR_MANAGER: Sparkles,
+  BRAND: Building2,
 };
 
 const ROLE_DISPLAY_NAMES: Record<Role, string> = {
   ADMIN: "Workspace Admin",
   ACCOUNT_MANAGER: "Brand Lead",
   CREATOR_MANAGER: "Talent Lead",
+  BRAND: "Brand Portal",
 };
 
 export default function RoleBadge({ role }: { role: Role | null }) {
