@@ -11,6 +11,10 @@ export async function GET(request: NextRequest) {
   const errorParam = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
+  if (connectToken && !/^[a-zA-Z0-9_]+$/.test(connectToken)) {
+    return new Response("Invalid state parameter", { status: 400 });
+  }
+
   const origin = request.nextUrl.origin;
 
   // Meta's webhook validator calls this same callback URL with hub.* query
