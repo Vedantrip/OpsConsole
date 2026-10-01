@@ -78,42 +78,81 @@ async function fetchFromGemini(
 ): Promise<TrendingTopic[]> {
   const prompt = buildTrendingPrompt(params);
 
-  // Gemini 1.5 Flash was shut down. Use the current GA Flash model.
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(
-    apiKey
-  )}`;
+  // Gemini 3.8 Flash is the primary model. Free-tier capacity can temporarily
+  // return 503, so retry once and then fall back to the cheaper Flash-Lite model.
+  const models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"];
+  let lastError: Error | null = null;
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        responseMimeType: "application/json",
-        maxOutputTokens: 2500,
-      },
-    }),
-  });
+  for (const model of models) {
+    const maxAttempts = model === models[0] ? 2 : 1;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API returned status ${response.status}: ${errorText}`);
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: prompt }],
+              },
+            ],
+            generationConfig: {
+              responseMimeType: "application/json",
+              maxOutputTokens: 2500,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          const error = new Error(
+            `Gemini API (${model}) returned status ${response.status}: ${errorText}`
+          );
+
+          // 503/500/504 are transient server-side errors. Google recommends
+          // exponential backoff for these rather than failing immediately.
+          if ([500, 503, 504].includes(response.status) && attempt < maxAttempts - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1500 * 2 ** attempt));
+            lastError = error;
+            continue;
+          }
+
+          throw error;
+        }
+
+        const result = await response.json();
+        const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!rawText) {
+          throw new Error(`No text content returned from Gemini (${model})`);
+        }
+
+        const parsed = JSON.parse(rawText);
+        return Array.isArray(parsed) ? parsed : parsed.topics || [];
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Do not burn through the free daily quota with repeated 429s.
+        if (
+          lastError.message.includes("status 429") ||
+          lastError.message.includes("status 400") ||
+          lastError.message.includes("status 401") ||
+          lastError.message.includes("status 403")
+        ) {
+          throw lastError;
+        }
+      }
+    }
   }
 
-  const result = await response.json();
-  const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!rawText) {
-    throw new Error("No text content returned from Gemini API");
-  }
-
-  const parsed = JSON.parse(rawText);
-  return Array.isArray(parsed) ? parsed : parsed.topics || [];
+  throw lastError ?? new Error("Gemini API request failed");
 }
 
 async function fetchFromOpenAI(
