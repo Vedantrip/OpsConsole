@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import Sidebar from "@/components/sidebar";
 import "./globals.css";
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+          <Script id="theme-script" strategy="beforeInteractive">{themeScript}</Script>
         </head>
         <body className="min-h-screen font-sans md:flex">
           <Sidebar />
