@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { reviewDeliverable } from "./actions";
+import { reviewDeliverable } from "../actions";
 
 export default function DeliverableReview({ deliverableId, status, feedback }: { deliverableId: string; status: string; feedback: string | null }) {
   const [revision, setRevision] = useState(false);
