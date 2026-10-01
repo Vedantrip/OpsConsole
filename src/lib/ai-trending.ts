@@ -78,8 +78,8 @@ async function fetchFromGemini(
 ): Promise<TrendingTopic[]> {
   const prompt = buildTrendingPrompt(params);
 
-  // Use Gemini 1.5 Flash for high speed and precision
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(
+  // Gemini 1.5 Flash was shut down. Use the current GA Flash model.
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(
     apiKey
   )}`;
 
@@ -95,7 +95,6 @@ async function fetchFromGemini(
       ],
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.7,
         maxOutputTokens: 2500,
       },
     }),
