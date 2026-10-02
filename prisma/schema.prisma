@@ -93,6 +93,8 @@ model Creator {
   rateCard              String?
   notes                 String?
   connectToken          String?                    @unique
+  portalInviteSentAt    DateTime?
+  portalInviteCount     Int                        @default(0)
   instagramAccountId    String?
   instagramAccessToken  String?
   tokenExpiresAt        DateTime?
