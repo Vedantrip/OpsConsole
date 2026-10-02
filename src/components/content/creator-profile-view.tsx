@@ -29,7 +29,7 @@ import {
   Link2,
   Flame,
 } from "lucide-react";
-import { getOrCreateConnectToken } from "@/app/creators/[id]/actions";
+import { getOrCreateConnectToken, sendPortalInviteEmailAction } from "@/app/creators/[id]/actions";
 
 interface CreatorProfileViewProps {
   creator: {
@@ -41,6 +41,8 @@ interface CreatorProfileViewProps {
     rateCard: string | null;
     notes: string | null;
     connectToken: string | null;
+    portalInviteSentAt: Date | string | null;
+    portalInviteCount: number;
     instagramConnectedAt: Date | string | null;
     mountliftScore: number | null;
     engagementScore: number | null;
@@ -69,6 +71,9 @@ export default function CreatorProfileView({
   const [copiedLink, setCopiedLink] = useState(false);
   const [currentToken, setCurrentToken] = useState<string | null>(creator.connectToken);
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [inviteSentAt, setInviteSentAt] = useState<Date | string | null>(creator.portalInviteSentAt);
+  const [inviteCount, setInviteCount] = useState(creator.portalInviteCount ?? 0);
 
   const handleCopyConnectLink = async () => {
     try {
@@ -87,6 +92,29 @@ export default function CreatorProfileView({
       console.error("Failed to copy connect link:", err);
     } finally {
       setIsGeneratingToken(false);
+    }
+  };
+
+  const handleSendPortalInvite = async () => {
+    if (!creator.email) return;
+
+    setIsSendingInvite(true);
+    try {
+      const res = await sendPortalInviteEmailAction(creator.id);
+      if (res.success && !res.mocked) {
+        setInviteSentAt(res.portalInviteSentAt ?? new Date().toISOString());
+        setInviteCount(res.portalInviteCount ?? inviteCount + 1);
+      }
+      if (res.mocked) {
+        window.alert("SMTP is not configured for this deployment, so the invite was logged but not actually sent.");
+      } else if (!res.success) {
+        window.alert(res.error || "Failed to send portal invite.");
+      }
+    } catch (err) {
+      console.error("Failed to send portal invite:", err);
+      window.alert("Failed to send portal invite. Check the email configuration and try again.");
+    } finally {
+      setIsSendingInvite(false);
     }
   };
 
@@ -185,6 +213,19 @@ export default function CreatorProfileView({
 
             {/* Right: Portal actions */}
             <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex items-center gap-2">
+                  {creator.email && (
+                    <button
+                      onClick={handleSendPortalInvite}
+                      disabled={isSendingInvite}
+                      className="btn btn-primary btn-small"
+                      title="Send the creator their private portal invite by email"
+                    >
+                      <Zap size={13} />
+                      <span>{isSendingInvite ? "Sending..." : inviteSentAt ? "Resend Invite" : "Send Portal Invite"}</span>
+                    </button>
+                  )}
               <button
                 onClick={handleCopyConnectLink}
                 disabled={isGeneratingToken}
@@ -215,7 +256,13 @@ export default function CreatorProfileView({
                   <span>View Portal</span>
                 </a>
               )}
-            </div>
+                </div>
+                {inviteSentAt && (
+                  <div className="text-[10px] text-muted font-mono">
+                    Invite sent {new Date(inviteSentAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {inviteCount} send{inviteCount === 1 ? "" : "s"}
+                  </div>
+                )}
+              </div>
           </div>
         </div>
       ) : (
