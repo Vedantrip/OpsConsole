@@ -226,4 +226,39 @@ export async function getOrCreateConnectToken(creatorId: string) {
   return { token: generatedToken };
 }
 
+export async function sendPortalInviteEmailAction(creatorId: string) {
+  await requireAccess("/creators");
+  const context = await requireContext();
+
+  const creator = await prisma.creator.findUnique({
+    where: { id: creatorId, ...creatorScope(context) },
+    select: { id: true, name: true, email: true, connectToken: true },
+  });
+
+  if (!creator) throw new Error("Creator not found or access denied.");
+  if (!creator.email) throw new Error("Creator does not have an email address specified.");
+
+  let token = creator.connectToken;
+  if (!token) {
+    token = "ml_" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    await prisma.creator.update({
+      where: { id: creatorId },
+      data: { connectToken: token },
+    });
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const portalUrl = `${baseUrl}/portal/${token}`;
+
+  const { sendCreatorPortalInviteEmail } = await import("@/lib/email");
+  const res = await sendCreatorPortalInviteEmail({
+    creatorEmail: creator.email,
+    creatorName: creator.name,
+    portalUrl,
+  });
+
+  revalidatePath(`/creators/${creatorId}`);
+  return res;
+}
+
 

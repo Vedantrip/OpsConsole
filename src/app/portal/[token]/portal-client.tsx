@@ -108,9 +108,26 @@ export default function PortalClient({
   const recentMedia = currentInsights?.recentMedia || [];
 
   return (
-    <div className="min-h-screen bg-paper text-ink font-sans">
+    <div className="min-h-screen bg-paper text-ink font-sans relative">
+      {/* Background Ambience & Pattern */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-50 dark:opacity-25">
+        <div className="absolute top-10 right-1/3 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-amber-500/5 blur-3xl" />
+        <svg
+          className="absolute inset-0 w-full h-full stroke-line/35 [mask-image:radial-gradient(ellipse_at_top,white,transparent_75%)]"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="portal-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M0 30V.5H30" fill="none" strokeWidth="0.75" strokeDasharray="1 3" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#portal-grid)" />
+        </svg>
+      </div>
+
       {/* Top Standalone Header */}
-      <header className="border-b border-line bg-panel sticky top-0 z-20">
+      <header className="border-b border-line bg-panel/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-charcoal text-gold flex items-center justify-center font-mono font-bold text-xs">

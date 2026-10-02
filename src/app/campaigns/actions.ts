@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireContext, campaignScope } from "@/lib/access";
+import { sendDeliverableAssignedEmail } from "@/lib/email";
 
 function dateFromForm(value: FormDataEntryValue | null) {
   const raw = String(value ?? "").trim();
@@ -55,7 +56,7 @@ export async function addDeliverable(campaignId: string, formData: FormData) {
     if (conflict) return { error: `This creator already has a ${conflict.type.toLowerCase()} due that day for ${conflict.campaign.name}. Choose another date.` };
   }
 
-  await prisma.deliverable.create({
+  const created = await prisma.deliverable.create({
     data: {
       campaignId,
       creatorId,
@@ -63,7 +64,32 @@ export async function addDeliverable(campaignId: string, formData: FormData) {
       agreedRate: Number(formData.get("agreedRate") ?? 0),
       dueDate,
     },
+    include: {
+      creator: { select: { name: true, email: true, connectToken: true } },
+      campaign: { select: { name: true, brand: { select: { name: true } } } },
+    },
   });
+
+  // Automated direct email notification to the creator
+  if (created.creator.email) {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      const portalUrl = created.creator.connectToken ? `${baseUrl}/portal/${created.creator.connectToken}` : undefined;
+
+      await sendDeliverableAssignedEmail({
+        creatorEmail: created.creator.email,
+        creatorName: created.creator.name,
+        brandName: created.campaign.brand.name,
+        campaignName: created.campaign.name,
+        deliverableType: created.type,
+        agreedRate: Number(created.agreedRate),
+        dueDate: created.dueDate,
+        portalUrl,
+      });
+    } catch (emailErr) {
+      console.error("[Email Notification Error]", emailErr);
+    }
+  }
 
   revalidatePath(`/campaigns/${campaignId}`);
   revalidatePath("/");

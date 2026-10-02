@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarDays, ChevronRight, Clapperboard, Clock3, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarDays, ChevronRight, Clapperboard, Clock3, Sparkles, Users, Layers, Award, TrendingUp, CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireContext, creatorScope } from "@/lib/access";
 import AITrendingHub from "@/components/content/ai-trending-hub";
@@ -58,7 +58,7 @@ export default async function CreatorManagerDashboard() {
     prisma.deliverable.findMany({
       where: { creator: creatorWhere },
       include: {
-        creator: { select: { id: true, name: true } },
+        creator: { select: { id: true, name: true, handle: true } },
         campaign: { select: { id: true, name: true, brand: { select: { name: true } } } },
       },
       orderBy: [{ dueDate: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
@@ -73,59 +73,95 @@ export default async function CreatorManagerDashboard() {
   ).length;
 
   return (
-    <div className="space-y-8 animate-fade-up">
-      <div className="card p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-8 animate-fade-up relative">
+      {/* Subtle Background Pattern & Ambient Glow */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-60 dark:opacity-30">
+        <div
+          className="absolute -top-24 right-1/4 w-96 h-96 rounded-full bg-gold/10 blur-3xl"
+        />
+        <div
+          className="absolute top-1/2 -left-20 w-80 h-80 rounded-full bg-amber-500/5 blur-3xl"
+        />
+        <svg
+          className="absolute inset-0 w-full h-full stroke-line/40 [mask-image:radial-gradient(ellipse_at_top,white,transparent_75%)]"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="creator-grid-pattern" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M0 32V.5H32" fill="none" strokeWidth="0.75" strokeDasharray="2 2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#creator-grid-pattern)" />
+        </svg>
+      </div>
+
+      {/* Hero Header */}
+      <div className="card p-6 border-line/80 bg-paper/70 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-gold/5 pointer-events-none" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <p className="eyebrow">Creative studio</p>
-            <h1 className="text-2xl font-display font-semibold tracking-tight text-ink">What&apos;s in motion</h1>
-            <p className="text-sm text-muted mt-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="eyebrow mb-0">Creative Studio & Roster</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="text-[10px] font-mono text-muted uppercase">Ops Console v2</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-ink">
+              What&apos;s in motion
+            </h1>
+            <p className="text-xs sm:text-sm text-muted mt-1 max-w-2xl leading-relaxed">
               {openDeliverables
-                ? `${openDeliverables} deliverable${openDeliverables === 1 ? "" : "s"} actively in production across brand collaborations.`
-                : "All creator collaborations and content deliveries are up to date."}
+                ? `${openDeliverables} deliverable${openDeliverables === 1 ? "" : "s"} actively in production across brand partnerships.`
+                : "All creator collaborations, content reviews, and deliverables are up to date."}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/creators"
-              className="text-xs font-medium px-3 py-1.5 rounded-md border border-line hover:bg-paper transition-colors text-ink"
+              className="btn btn-secondary btn-small flex items-center gap-1.5"
             >
-              Explore creators
+              <Users size={13} />
+              <span>Explore Roster ({creators.length})</span>
             </Link>
             <Link
               href="/insights"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md bg-ink text-paper hover:bg-charcoal transition-colors"
+              className="btn btn-primary btn-small flex items-center gap-1.5"
             >
-              <BarChart3 size={14} />
-              Performance intelligence
+              <BarChart3 size={13} />
+              <span>Performance Radar</span>
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Metric
-          label="Creators in focus"
+          label="Creators in Focus"
           value={creators.length}
-          note="Active creator partnerships"
+          note="Active roster partnerships"
+          icon={<Users size={16} className="text-gold" />}
           wide
         />
         <Metric
-          label="In production"
+          label="In Production"
           value={openDeliverables}
-          note="Deliverables currently being crafted"
+          note="Deliverables being crafted"
+          icon={<Clapperboard size={16} className="text-gold" />}
           lift
         />
         <Metric
-          label="Due this week"
+          label="Due This Week"
           value={dueSoon}
-          note="Landing in the next 7 days"
+          note="Landing in next 7 days"
+          icon={<CalendarDays size={16} className={dueSoon > 0 ? "text-viz-rose" : "text-gold"} />}
           alert={dueSoon > 0}
         />
         <Metric
-          label="Audited & ready"
+          label="Graph API Verified"
           value={igReady}
-          note="Profiles with performance data ready"
+          note="Profiles with active intelligence"
+          icon={<Award size={16} className="text-emerald-500" />}
           lift
         />
       </div>
@@ -135,22 +171,24 @@ export default async function CreatorManagerDashboard() {
         <AITrendingHub />
       </section>
 
+      {/* Upcoming Deliverables Section */}
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4">
           <div>
-            <p className="eyebrow">Content timeline</p>
-            <h2 className="text-base font-display font-semibold text-ink">Upcoming deliverables</h2>
+            <p className="eyebrow">Production Timeline</p>
+            <h2 className="text-base font-display font-semibold text-ink">Upcoming Deliverables</h2>
           </div>
           <Link href="/campaigns" className="text-xs text-gold hover:underline flex items-center gap-1 font-medium w-fit">
-            Explore campaigns <ArrowRight size={12} />
+            <span>Explore all campaigns</span> <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="card overflow-hidden">
+
+        <div className="card overflow-hidden bg-paper/50 backdrop-blur-sm border-line">
           {deliverables.length === 0 ? (
-            <div className="p-8 text-center">
-              <Clapperboard size={24} className="mx-auto text-gold mb-3 opacity-60" />
-              <p className="text-sm font-medium text-ink">All caught up! No open deliverables right now.</p>
-              <p className="text-xs text-muted mt-1">When new campaigns kick off, upcoming deliverables will land right here.</p>
+            <div className="p-10 text-center space-y-2">
+              <CheckCircle2 size={24} className="mx-auto text-gold mb-2 opacity-70" />
+              <p className="text-sm font-semibold text-ink">All caught up! No pending deliverables.</p>
+              <p className="text-xs text-muted">When new brand campaigns kick off, upcoming deliverables will land right here.</p>
             </div>
           ) : (
             <div className="divide-y divide-line">
@@ -163,7 +201,7 @@ export default async function CreatorManagerDashboard() {
                     className="group block px-4 py-3.5 sm:px-5 hover:bg-paper/80 transition-colors"
                   >
                     <div className="flex items-start gap-3 sm:gap-4">
-                      <div className="mt-0.5 shrink-0 w-8 h-8 rounded-md bg-paper border border-line text-muted flex items-center justify-center">
+                      <div className="mt-0.5 shrink-0 w-8 h-8 rounded-md bg-paper border border-line text-muted flex items-center justify-center group-hover:border-gold/40 group-hover:text-gold transition-colors">
                         <Clapperboard size={15} />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -178,7 +216,7 @@ export default async function CreatorManagerDashboard() {
                           <span className="mx-1.5 text-line">·</span>
                           {d.campaign.name}
                           <span className="mx-1.5 text-line">·</span>
-                          {d.campaign.brand.name}
+                          <span className="text-muted">{d.campaign.brand.name}</span>
                         </p>
                         <div
                           className={`flex items-center gap-1.5 text-[11px] font-mono mt-1.5 ${
@@ -186,7 +224,7 @@ export default async function CreatorManagerDashboard() {
                           }`}
                         >
                           <CalendarDays size={12} />
-                          {dueLabel(d.dueDate)}
+                          <span>{dueLabel(d.dueDate)}</span>
                         </div>
                       </div>
                       <ChevronRight
@@ -199,50 +237,32 @@ export default async function CreatorManagerDashboard() {
               })}
             </div>
           )}
+
           {deliverables.length > 0 && (
-            <div className="px-5 py-2.5 border-t border-line bg-paper/50 flex items-center gap-2 text-[11px] text-muted font-mono">
+            <div className="px-5 py-2.5 border-t border-line bg-paper/40 flex items-center gap-2 text-[11px] text-muted font-mono">
               <Clock3 size={13} />
-              Showing the next {deliverables.length} upcoming deliverable{deliverables.length === 1 ? "" : "s"}, ordered by deadline.
+              <span>Showing next {deliverables.length} upcoming deliverable{deliverables.length === 1 ? "" : "s"}, ordered by deadline.</span>
             </div>
           )}
         </div>
       </section>
 
-      <Link
-        href="/insights"
-        className="card p-5 flex items-center justify-between hover:border-gold transition-colors group"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-md bg-paper border border-line text-gold">
-            <Sparkles size={18} />
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-ink group-hover:text-gold transition-colors">
-              Explore creator performance intelligence
-            </div>
-            <div className="text-xs text-muted">
-              Analyze engagement rates, view patterns, and audience demographics across your creators
-            </div>
-          </div>
-        </div>
-        <ArrowRight size={16} className="text-muted group-hover:text-gold group-hover:translate-x-0.5 transition-all" />
-      </Link>
-
+      {/* Quick Links & Team Briefs Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        <div className="card overflow-hidden xl:col-span-2">
+        <div className="card overflow-hidden xl:col-span-2 bg-paper/50 backdrop-blur-sm">
           <div className="px-5 py-3 border-b border-line flex items-center justify-between bg-paper/30">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-muted">Team briefs & notes</h2>
-            <span className="text-[10px] font-mono text-muted">DIRECT</span>
+            <h2 className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Team Briefs & Notes</h2>
+            <span className="text-[10px] font-mono text-muted bg-paper px-2 py-0.5 rounded border border-line">DIRECT</span>
           </div>
           {updates.length === 0 ? (
-            <p className="p-5 text-sm text-muted">No active briefs or notes right now.</p>
+            <p className="p-6 text-sm text-muted text-center">No active briefs or notes right now.</p>
           ) : (
             <div className="divide-y divide-line">
               {updates.map((u) => (
-                <article key={u.id} className="px-5 py-3.5">
-                  <h3 className="text-sm font-medium text-ink">{u.title}</h3>
-                  <p className="text-xs text-muted mt-1 whitespace-pre-wrap">{u.body}</p>
-                  <time className="text-[10px] font-mono text-muted mt-2 block">{u.createdAt.toLocaleDateString()}</time>
+                <article key={u.id} className="px-5 py-3.5 space-y-1">
+                  <h3 className="text-sm font-semibold text-ink">{u.title}</h3>
+                  <p className="text-xs text-muted whitespace-pre-wrap leading-relaxed">{u.body}</p>
+                  <time className="text-[10px] font-mono text-muted block pt-1">{u.createdAt.toLocaleDateString()}</time>
                 </article>
               ))}
             </div>
@@ -251,14 +271,16 @@ export default async function CreatorManagerDashboard() {
 
         <div className="xl:col-span-3">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-display font-semibold text-ink">Featured creators</h2>
+            <h2 className="text-base font-display font-semibold text-ink">Featured Creators</h2>
             <Link href="/creators" className="text-xs text-gold hover:underline flex items-center gap-1 font-medium">
-              View all {creators.length} creators <ArrowRight size={12} /></Link>
+              <span>View all {creators.length} creators</span> <ArrowRight size={12} />
+            </Link>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {creators.length === 0 ? (
               <div className="col-span-full card p-6 text-center text-sm text-muted">
-                No creators in your circle yet.
+                No creators in your roster yet.
               </div>
             ) : (
               creators.slice(0, 6).map((c) => {
@@ -267,27 +289,26 @@ export default async function CreatorManagerDashboard() {
                   <Link
                     key={c.id}
                     href={`/creators/${c.id}`}
-                    className="card p-4 flex flex-col justify-between hover:border-gold transition-colors"
+                    className="card p-4 flex flex-col justify-between hover:border-gold/50 hover:shadow-sm transition-all duration-200 bg-paper/40 hover:bg-paper/70"
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-paper border border-line text-ink flex items-center justify-center font-display font-semibold text-xs uppercase">
+                      <div className="w-9 h-9 rounded-lg bg-gold/10 border border-gold/25 text-gold flex items-center justify-center font-display font-semibold text-xs uppercase shrink-0">
                         {c.name.charAt(0)}
                       </div>
-                      <div className="overflow-hidden">
-                        <div className="text-sm font-medium text-ink truncate">{c.name}</div>
+                      <div className="overflow-hidden min-w-0">
+                        <div className="text-sm font-semibold text-ink truncate">{c.name}</div>
                         <div className="text-xs text-muted font-mono truncate">
                           {c.handle ? (c.handle.startsWith("@") ? c.handle : `@${c.handle}`) : "No handle"}
                         </div>
                       </div>
                     </div>
+
                     <div className="pt-2.5 border-t border-line flex items-center justify-between text-xs font-mono">
-                      <span className="text-muted">{c._count.deliverables} in progress</span>
+                      <span className="text-muted">{c._count.deliverables} active</span>
                       <span className={insight ? "text-gold font-medium" : "text-muted"}>
                         {insight?.engagementRate != null
                           ? `${insight.engagementRate.toFixed(1)}% ER`
-                          : insight
-                          ? "Audited"
-                          : "No audit"}
+                          : "Ready"}
                       </span>
                     </div>
                   </Link>
@@ -308,6 +329,7 @@ function Metric({
   lift,
   alert,
   wide,
+  icon,
 }: {
   label: string;
   value: number;
@@ -315,12 +337,18 @@ function Metric({
   lift?: boolean;
   alert?: boolean;
   wide?: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
-    <div className={`card p-5 ${wide ? "col-span-2 lg:col-span-1" : ""}`}>
-      <div className="text-xs text-muted font-medium mb-1">{label}</div>
-      <div className={`font-display font-semibold stat-number ${wide ? "text-3xl" : "text-2xl"} ${alert ? "text-viz-rose" : lift ? "text-gold" : "text-ink"}`}>{value}</div>
-      <div className="text-[11px] text-muted mt-1">{note}</div>
+    <div className={`card p-5 border-line bg-paper/50 backdrop-blur-sm flex flex-col justify-between ${wide ? "col-span-2 lg:col-span-1" : ""}`}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-muted font-medium">{label}</span>
+        {icon}
+      </div>
+      <div className={`font-display font-semibold stat-number ${wide ? "text-3xl" : "text-2xl"} ${alert ? "text-viz-rose" : lift ? "text-gold" : "text-ink"}`}>
+        {value}
+      </div>
+      <div className="text-[11px] text-muted mt-1 truncate">{note}</div>
     </div>
   );
 }

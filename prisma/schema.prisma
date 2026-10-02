@@ -318,3 +318,17 @@ model ContentTag {
   name  String @unique
   posts Post[]
 }
+
+model NotificationLog {
+  id          String   @id @default(cuid())
+  recipient   String
+  subject     String
+  type        String   // "DELIVERABLE_ASSIGNED" | "STATUS_UPDATED" | "PAYOUT_PROCESSED" | "PORTAL_INVITE" | "GENERAL"
+  status      String   // "SENT" | "FAILED" | "MOCKED"
+  metadata    Json?
+  error       String?
+  sentAt      DateTime @default(now())
+
+  @@index([recipient, sentAt])
+}
+
