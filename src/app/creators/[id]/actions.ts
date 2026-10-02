@@ -232,7 +232,7 @@ export async function sendPortalInviteEmailAction(creatorId: string) {
 
   const creator = await prisma.creator.findUnique({
     where: { id: creatorId, ...creatorScope(context) },
-    select: { id: true, name: true, email: true, connectToken: true },
+    select: { id: true, name: true, email: true, connectToken: true, portalInviteSentAt: true, portalInviteCount: true },
   });
 
   if (!creator) throw new Error("Creator not found or access denied.");
@@ -257,8 +257,22 @@ export async function sendPortalInviteEmailAction(creatorId: string) {
     portalUrl,
   });
 
+  if (res.success && !res.mocked) {
+    await prisma.creator.update({
+      where: { id: creatorId },
+      data: {
+        portalInviteSentAt: new Date(),
+        portalInviteCount: { increment: 1 },
+      },
+    });
+  }
+
   revalidatePath(`/creators/${creatorId}`);
-  return res;
+  return {
+    ...res,
+    portalInviteSentAt: res.success && !res.mocked ? new Date().toISOString() : creator.portalInviteSentAt,
+    portalInviteCount: res.success && !res.mocked ? creator.portalInviteCount + 1 : creator.portalInviteCount,
+  };
 }
 
 
