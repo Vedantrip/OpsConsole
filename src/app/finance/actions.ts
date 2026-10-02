@@ -31,7 +31,8 @@ export async function createPayout(deliverableId: string, campaignId: string, fo
   // Direct automated notification
   if (deliverable.creator.email) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      const { getAppBaseUrl } = await import("@/lib/app-url");
+      const baseUrl = getAppBaseUrl();
       const portalUrl = deliverable.creator.connectToken ? `${baseUrl}/portal/${deliverable.creator.connectToken}` : undefined;
 
       await sendPayoutNotificationEmail({
@@ -88,7 +89,8 @@ export async function updatePayout(id: string, formData: FormData) {
 
   if (updated.deliverable.creator.email && (status === "APPROVED" || status === "PAID")) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      const { getAppBaseUrl } = await import("@/lib/app-url");
+      const baseUrl = getAppBaseUrl();
       const portalUrl = updated.deliverable.creator.connectToken ? `${baseUrl}/portal/${updated.deliverable.creator.connectToken}` : undefined;
 
       await sendPayoutNotificationEmail({
@@ -138,7 +140,8 @@ export async function markPayoutPaid(id: string) {
 
   if (updated.deliverable.creator.email) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      const { getAppBaseUrl } = await import("@/lib/app-url");
+      const baseUrl = getAppBaseUrl();
       const portalUrl = updated.deliverable.creator.connectToken ? `${baseUrl}/portal/${updated.deliverable.creator.connectToken}` : undefined;
 
       await sendPayoutNotificationEmail({

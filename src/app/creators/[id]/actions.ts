@@ -247,7 +247,8 @@ export async function sendPortalInviteEmailAction(creatorId: string) {
     });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const { getAppBaseUrl } = await import("@/lib/app-url");
+  const baseUrl = getAppBaseUrl();
   const portalUrl = `${baseUrl}/portal/${token}`;
 
   const { sendCreatorPortalInviteEmail } = await import("@/lib/email");

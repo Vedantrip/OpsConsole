@@ -73,7 +73,8 @@ export async function addDeliverable(campaignId: string, formData: FormData) {
   // Automated direct email notification to the creator
   if (created.creator.email) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      const { getAppBaseUrl } = await import("@/lib/app-url");
+      const baseUrl = getAppBaseUrl();
       const portalUrl = created.creator.connectToken ? `${baseUrl}/portal/${created.creator.connectToken}` : undefined;
 
       await sendDeliverableAssignedEmail({

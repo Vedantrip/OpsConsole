@@ -54,17 +54,14 @@ async function instagramGraphGet<T = any>(
   return data as T;
 }
 
-export function getBaseAppUrl(origin?: string): string {
-  if (origin && origin.startsWith("http")) return origin.replace(/\/$/, "");
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
-  return "http://localhost:3000";
-}
+import { getAppBaseUrl } from "./app-url";
+export { getAppBaseUrl };
+export const getBaseAppUrl = getAppBaseUrl;
 
 function getInstagramRedirectUri(origin?: string): string {
   const configured = process.env.INSTAGRAM_REDIRECT_URI?.trim();
   if (configured) return configured.replace(/\/$/, "");
-  return `${getBaseAppUrl(origin)}/api/auth/instagram/callback`;
+  return `${getAppBaseUrl(origin)}/api/auth/instagram/callback`;
 }
 
 /**
