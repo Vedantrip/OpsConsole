@@ -263,6 +263,8 @@ export default function CreatorProfileView({
                   </div>
                 )}
               </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
