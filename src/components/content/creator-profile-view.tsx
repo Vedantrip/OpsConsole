@@ -212,58 +212,55 @@ export default function CreatorProfileView({
             </div>
 
             {/* Right: Portal actions */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <div className="flex items-center gap-2">
-                  {creator.email && (
-                    <button
-                      onClick={handleSendPortalInvite}
-                      disabled={isSendingInvite}
-                      className="btn btn-primary btn-small"
-                      title="Send the creator their private portal invite by email"
-                    >
-                      <Zap size={13} />
-                      <span>{isSendingInvite ? "Sending..." : inviteSentAt ? "Resend Invite" : "Send Portal Invite"}</span>
-                    </button>
-                  )}
-              <button
-                onClick={handleCopyConnectLink}
-                disabled={isGeneratingToken}
-                className="btn btn-secondary btn-small"
-                title="Copy creator's private portal URL"
-              >
-                {copiedLink ? (
-                  <>
-                    <CheckCircle2 size={13} className="text-emerald-500" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={13} />
-                    <span>Copy Portal Link</span>
-                  </>
+            <div className="flex flex-col items-end gap-2 shrink-0">
+              <div className="flex items-center gap-2">
+                {creator.email && (
+                  <button
+                    onClick={handleSendPortalInvite}
+                    disabled={isSendingInvite}
+                    className="btn btn-primary btn-small"
+                    title="Send the creator their private portal invite by email"
+                  >
+                    <Zap size={13} />
+                    <span>{isSendingInvite ? "Sending..." : inviteSentAt ? "Resend Invite" : "Send Portal Invite"}</span>
+                  </button>
                 )}
-              </button>
-              {currentToken && (
-                <a
-                  href={`/portal/${currentToken}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-small"
-                  title="Open Creator Portal preview"
+                <button
+                  onClick={handleCopyConnectLink}
+                  disabled={isGeneratingToken}
+                  className="btn btn-secondary btn-small"
+                  title="Copy creator's private portal URL"
                 >
-                  <ExternalLink size={13} />
-                  <span>View Portal</span>
-                </a>
-              )}
-                </div>
-                {inviteSentAt && (
-                  <div className="text-[10px] text-muted font-mono">
-                    Invite sent {new Date(inviteSentAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {inviteCount} send{inviteCount === 1 ? "" : "s"}
-                  </div>
+                  {copiedLink ? (
+                    <>
+                      <CheckCircle2 size={13} className="text-emerald-500" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={13} />
+                      <span>Copy Portal Link</span>
+                    </>
+                  )}
+                </button>
+                {currentToken && (
+                  <a
+                    href={`/portal/${currentToken}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-small"
+                    title="Open Creator Portal preview"
+                  >
+                    <ExternalLink size={13} />
+                    <span>View Portal</span>
+                  </a>
                 )}
               </div>
-              </div>
+              {inviteSentAt && (
+                <div className="text-[10px] text-muted font-mono">
+                  Invite sent {new Date(inviteSentAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {inviteCount} send{inviteCount === 1 ? "" : "s"}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -286,34 +283,52 @@ export default function CreatorProfileView({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleCopyConnectLink}
-              disabled={isGeneratingToken}
-              className="btn btn-primary btn-small"
-            >
-              {copiedLink ? (
-                <>
-                  <CheckCircle2 size={13} />
-                  <span>Link Copied to Clipboard!</span>
-                </>
-              ) : (
-                <>
-                  <Link2 size={13} />
-                  <span>{isGeneratingToken ? "Generating Link..." : "Share Connect Link"}</span>
-                </>
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              {creator.email && (
+                <button
+                  onClick={handleSendPortalInvite}
+                  disabled={isSendingInvite}
+                  className="btn btn-primary btn-small"
+                  title="Send the creator their private portal invite by email"
+                >
+                  <Zap size={13} />
+                  <span>{isSendingInvite ? "Sending..." : inviteSentAt ? "Resend Invite" : "Send Portal Invite"}</span>
+                </button>
               )}
-            </button>
-            {currentToken && (
-              <a
-                href={`/portal/${currentToken}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={handleCopyConnectLink}
+                disabled={isGeneratingToken}
                 className="btn btn-secondary btn-small"
               >
-                <ExternalLink size={13} />
-                <span>Portal Preview</span>
-              </a>
+                {copiedLink ? (
+                  <>
+                    <CheckCircle2 size={13} />
+                    <span>Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 size={13} />
+                    <span>{isGeneratingToken ? "Generating Link..." : "Share Connect Link"}</span>
+                  </>
+                )}
+              </button>
+              {currentToken && (
+                <a
+                  href={`/portal/${currentToken}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-small"
+                >
+                  <ExternalLink size={13} />
+                  <span>Portal Preview</span>
+                </a>
+              )}
+            </div>
+            {inviteSentAt && (
+              <div className="text-[10px] text-muted font-mono">
+                Invite sent {new Date(inviteSentAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {inviteCount} send{inviteCount === 1 ? "" : "s"}
+              </div>
             )}
           </div>
         </div>
