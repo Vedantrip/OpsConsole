@@ -134,6 +134,7 @@ model AccountManagerAssignment {
   @@index([clerkUserId])
 }
 
+
 model ManagerUpdate {
   id                String   @id @default(cuid())
   targetClerkUserId String
