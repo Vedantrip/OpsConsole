@@ -15,8 +15,12 @@ import {
   TrendingUp,
   ShieldCheck,
   ExternalLink,
+  Zap,
+  Flame,
+  Award,
 } from "lucide-react";
 import AITrendingHub from "@/components/content/ai-trending-hub";
+import CreatorVibeStudio from "@/components/content/creator-vibe-studio";
 import {
   BarChart,
   Bar,
@@ -43,7 +47,7 @@ type CreatorData = {
   privateInsights: any;
 };
 
-const VIZ_COLORS = ["#CC9A3D", "#3F6B62", "#B15C67", "#52657A", "#7A7266", "#DDB05B"];
+const VIZ_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#06B6D4"];
 
 export default function PortalClient({
   token,
@@ -108,127 +112,124 @@ export default function PortalClient({
   const recentMedia = currentInsights?.recentMedia || [];
 
   return (
-    <div className="min-h-screen bg-paper text-ink font-sans relative">
-      {/* Background Ambience & Pattern */}
-      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-50 dark:opacity-25">
-        <div className="absolute top-10 right-1/3 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-amber-500/5 blur-3xl" />
-        <svg
-          className="absolute inset-0 w-full h-full stroke-line/35 [mask-image:radial-gradient(ellipse_at_top,white,transparent_75%)]"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern id="portal-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-              <path d="M0 30V.5H30" fill="none" strokeWidth="0.75" strokeDasharray="1 3" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#portal-grid)" />
-        </svg>
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-x-hidden">
+      {/* Dynamic Gen-Z Ambient Glows */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-70">
+        <div className="absolute top-10 right-1/4 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px] animate-pulse" />
+        <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] rounded-full bg-purple-600/15 blur-[120px]" />
+        <div className="absolute bottom-20 right-10 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[100px]" />
       </div>
 
       {/* Top Standalone Header */}
-      <header className="border-b border-line bg-panel/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-charcoal text-gold flex items-center justify-center font-mono font-bold text-xs">
+      <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-display font-extrabold text-sm shadow-lg shadow-indigo-500/25">
               ML
             </div>
             <div>
-              <div className="font-display font-bold text-sm tracking-tight text-ink">MountLift Creator Studio</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-wider">Private Insights & Score</div>
+              <div className="font-display font-bold text-base tracking-tight text-white flex items-center gap-2">
+                <span>MountLift Creator Studio</span>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono font-bold border border-indigo-500/30">
+                  LIVE PORTAL
+                </span>
+              </div>
+              <div className="text-[11px] font-mono text-slate-400">Private Intelligence & Creator Score</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono bg-paper border border-line text-muted">
-              <Lock size={11} className="text-gold" />
-              Private to you
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-white/5 border border-white/10 text-slate-300">
+              <Lock size={12} className="text-indigo-400" />
+              <span>Encrypted & Private</span>
             </span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {justConnected && (
-          <div className="card p-4 bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3 text-xs animate-fade-up">
-            <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <div className="rounded-3xl p-5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-3 text-sm animate-fade-up backdrop-blur-xl shadow-xl">
+            <CheckCircle2 size={20} className="shrink-0 text-emerald-400" />
             <div>
-              <div className="font-semibold">Instagram Connected Successfully!</div>
-              <div>Your official insights and MountLift Creator Score have been calculated.</div>
+              <div className="font-bold">Instagram Connected Successfully! 🚀</div>
+              <div className="text-xs text-emerald-400/80">Your official insights and verified MountLift Creator Score have been calculated.</div>
             </div>
           </div>
         )}
 
         {syncError && (
-          <div className="card p-4 bg-viz-rose/10 border-viz-rose/30 text-viz-rose flex items-center gap-3 text-xs animate-fade-up">
-            <AlertCircle size={18} className="shrink-0" />
+          <div className="rounded-3xl p-5 bg-pink-500/15 border border-pink-500/30 text-pink-300 flex items-center gap-3 text-sm animate-fade-up backdrop-blur-xl shadow-xl">
+            <AlertCircle size={20} className="shrink-0" />
             <span>{syncError}</span>
           </div>
         )}
 
         {!isConnected ? (
           /* Unconnected State: Welcome and Connect CTA */
-          <div className="card p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-6 animate-fade-up">
-            <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/25 text-gold flex items-center justify-center mx-auto shadow-sm">
+          <div className="rounded-3xl p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-6 animate-fade-up bg-slate-900/80 border border-white/10 backdrop-blur-2xl shadow-2xl">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20">
               <Instagram size={32} />
             </div>
 
             <div className="space-y-2">
-              <p className="eyebrow">Creator Onboarding</p>
-              <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-ink">
+              <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30 uppercase">
+                Creator Onboarding
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-white">
                 Welcome, {creator.name}
               </h1>
-              <p className="text-sm text-muted max-w-md mx-auto">
-                Connect your official Instagram Creator/Business account to unlock your private audience analytics and calculate your MountLift Creator Score.
+              <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                Connect your official Instagram Creator/Business account to unlock verified audience analytics and calculate your MountLift Creator Score for upcoming brand deals.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl border border-line bg-paper/60 text-left space-y-2.5 text-xs text-muted">
-              <div className="flex items-center gap-2 font-medium text-ink">
-                <ShieldCheck size={16} className="text-gold" />
-                <span>Private & Read-Only Guarantee:</span>
+            <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.03] text-left space-y-2.5 text-xs text-slate-300">
+              <div className="flex items-center gap-2 font-bold text-white">
+                <ShieldCheck size={16} className="text-indigo-400" />
+                <span>100% Private & Read-Only Guarantee:</span>
               </div>
-              <ul className="list-disc pl-5 space-y-1">
+              <ul className="list-disc pl-5 space-y-1 text-slate-400">
                 <li>Uses Meta&apos;s official OAuth with read-only insights permission.</li>
                 <li>Your raw private follower details remain exclusive to this personal portal.</li>
-                <li>MountLift only uses aggregated signals to calculate your verified score for brand partnerships.</li>
+                <li>MountLift only uses verified engagement signals for brand collaboration matching.</li>
               </ul>
             </div>
 
             <div className="pt-2">
               <a
                 href={`/api/auth/instagram/login?token=${token}`}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-ink text-paper hover:bg-charcoal font-medium text-sm transition-all shadow-md hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm transition-all shadow-xl shadow-indigo-500/25 hover:scale-105 active:scale-95"
               >
-                <Instagram size={18} className="text-gold" />
+                <Instagram size={18} />
                 <span>Connect with Instagram</span>
               </a>
             </div>
           </div>
         ) : (
           /* Connected State: Score, Demographics, Media */
-          <div className="space-y-6 animate-fade-up">
+          <div className="space-y-8 animate-fade-up">
             {/* Header profile & Sync trigger */}
-            <div className="card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/25 text-gold flex items-center justify-center font-display font-bold text-lg">
+            <div className="rounded-3xl p-6 bg-slate-900/80 border border-white/10 backdrop-blur-2xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-display font-bold text-xl overflow-hidden shrink-0 shadow-lg">
                   {profile.profilePictureUrl ? (
                     <img
                       src={profile.profilePictureUrl}
                       alt={creator.name}
-                      className="w-full h-full rounded-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     "@"
                   )}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-display font-bold text-ink">{creator.name}</h1>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
-                      Verified Connected
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-xl font-display font-bold text-white">{creator.name}</h1>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold flex items-center gap-1">
+                      <CheckCircle2 size={11} /> Verified Creator
                     </span>
                   </div>
-                  <div className="text-xs text-muted font-mono mt-0.5">
+                  <div className="text-xs text-slate-400 font-mono mt-1">
                     {profile.username ? `@${profile.username}` : creator.handle} · {profile.followersCount?.toLocaleString()} followers · {profile.mediaCount} posts
                   </div>
                 </div>
@@ -238,83 +239,90 @@ export default function PortalClient({
                 <button
                   onClick={handleSync}
                   disabled={syncing}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border border-line bg-paper text-xs font-medium text-ink hover:bg-panel transition-colors disabled:opacity-60"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-white/10 bg-white/5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
                 >
-                  <RefreshCw size={13} className={syncing ? "animate-spin text-gold" : "text-muted"} />
-                  <span>{syncing ? "Syncing..." : "Sync Insights"}</span>
+                  <RefreshCw size={13} className={syncing ? "animate-spin text-indigo-400" : "text-slate-400"} />
+                  <span>{syncing ? "Syncing..." : "Sync Fresh Insights"}</span>
                 </button>
               </div>
             </div>
 
-            {/* MountLift Creator Score Showcase */}
+            {/* MountLift Creator Score Showcase Bento */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-              <div className="lg:col-span-4 card p-6 flex flex-col items-center justify-center text-center bg-gradient-to-b from-paper/40 to-panel border-line">
-                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted font-medium mb-1">
-                  <Sparkles size={14} className="text-gold" />
-                  <span>MountLift Creator Score</span>
+              <div className="lg:col-span-4 rounded-3xl p-6 flex flex-col items-center justify-center text-center bg-gradient-to-br from-indigo-950/50 via-purple-950/30 to-slate-900/80 border border-indigo-500/30 shadow-2xl relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-500/20 blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-indigo-300 font-bold mb-2">
+                  <Sparkles size={14} className="text-indigo-400" />
+                  <span>Verified MountLift Score</span>
                 </div>
-                <div className="text-6xl font-display font-bold text-gold stat-number my-2">
+                <div className="text-7xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-purple-300 my-2">
                   {scores.overall != null ? Math.round(scores.overall) : "—"}
                 </div>
-                <div className="text-[11px] text-muted">
-                  Official performance evaluation from Instagram Graph API
+                <div className="text-xs text-slate-400 max-w-[200px] leading-snug">
+                  Evaluated via official Instagram Graph API signals
                 </div>
               </div>
 
-              <div className="lg:col-span-8 card p-6 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+              <div className="lg:col-span-8 rounded-3xl p-6 grid grid-cols-2 sm:grid-cols-3 gap-3.5 bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
                 {[
                   { label: "Engagement", val: scores.engagement, desc: `${performance.avgEngagementRatePct || 0}% avg ER` },
                   { label: "Audience Quality", val: scores.audience, desc: "Verified demographics" },
                   { label: "Content Velocity", val: scores.content, desc: `${performance.avgViews?.toLocaleString() || "—"} avg reach` },
                   { label: "Posting Cadence", val: scores.consistency, desc: performance.consistency?.label || "Regular" },
-                  { label: "Profile Strength", val: scores.profile, desc: "Bio & verification" },
-                  { label: "Posts Analyzed", val: performance.reelsAnalyzed || 0, desc: "Recent media sample", raw: true },
+                  { label: "Profile Strength", val: scores.profile, desc: "Bio & authenticity" },
+                  { label: "Posts Sampled", val: performance.reelsAnalyzed || 0, desc: "Recent media audit", raw: true },
                 ].map((item) => (
-                  <div key={item.label} className="p-3.5 rounded-lg border border-line bg-paper/50 flex flex-col justify-between">
+                  <div key={item.label} className="p-4 rounded-2xl border border-white/5 bg-white/[0.03] flex flex-col justify-between hover:border-indigo-500/30 transition-all">
                     <div>
-                      <div className="text-[10px] font-mono uppercase tracking-wider text-muted font-medium">{item.label}</div>
-                      <div className="text-2xl font-bold font-display text-ink stat-number mt-1">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">{item.label}</div>
+                      <div className="text-2xl font-bold font-display text-white mt-1">
                         {item.val != null ? (item.raw ? item.val : Math.round(item.val)) : "—"}
                       </div>
                     </div>
-                    <div className="text-[11px] text-muted mt-2 truncate font-mono">{item.desc}</div>
+                    <div className="text-[11px] text-indigo-300 mt-2 truncate font-mono">{item.desc}</div>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Interactive Gen-Z Vibe & Hook Studio */}
+            <section>
+              <CreatorVibeStudio />
+            </section>
+
             {/* Demographics Row (Age, Gender, Geography) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Age Cohorts Bar Chart */}
-              <div className="card p-5 space-y-4">
+              <div className="rounded-3xl p-6 space-y-4 bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted font-medium">
-                    <BarChart3 size={14} className="text-gold" />
-                    <span>Verified Age Distribution</span>
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-indigo-300 font-bold">
+                    <BarChart3 size={14} className="text-indigo-400" />
+                    <span>Verified Age Cohorts</span>
                   </div>
-                  <span className="text-[10px] font-mono text-muted">Direct from Instagram</span>
+                  <span className="text-[10px] font-mono text-slate-400">Direct from Instagram</span>
                 </div>
 
                 {ageData.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-muted">
+                  <div className="py-12 text-center text-xs text-slate-400">
                     No age demographic data reported by Instagram yet.
                   </div>
                 ) : (
                   <div className="h-56 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={ageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#7A7266" }} />
-                        <YAxis tick={{ fontSize: 11, fill: "#7A7266" }} unit="%" />
+                        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94A3B8" }} />
+                        <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} unit="%" />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "var(--color-panel)",
-                            borderColor: "var(--color-line)",
-                            borderRadius: 8,
+                            backgroundColor: "#0F172A",
+                            borderColor: "rgba(255,255,255,0.1)",
+                            borderRadius: 12,
                             fontSize: 12,
+                            color: "#fff",
                           }}
                           formatter={(value: any) => [`${value}%`, "Share"]}
                         />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                           {ageData.map((_entry: { label: string; value: number }, index: number) => (
                             <Cell key={`cell-${index}`} fill={VIZ_COLORS[index % VIZ_COLORS.length]} />
                           ))}
@@ -326,26 +334,26 @@ export default function PortalClient({
               </div>
 
               {/* Gender & Location Breakdown */}
-              <div className="card p-5 space-y-5 flex flex-col justify-between">
+              <div className="rounded-3xl p-6 space-y-5 flex flex-col justify-between bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted font-medium">
-                      <Users size={14} className="text-gold" />
+                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-purple-300 font-bold">
+                      <Users size={14} className="text-purple-400" />
                       <span>Gender Breakdown</span>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {genderData.length === 0 ? (
-                      <p className="text-xs text-muted">No gender data reported.</p>
+                      <p className="text-xs text-slate-400">No gender data reported.</p>
                     ) : (
                       genderData.map((g: any, i: number) => (
                         <div key={g.label} className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-ink font-medium">{g.label}</span>
-                            <span className="font-mono text-muted">{g.value}%</span>
+                          <div className="flex justify-between text-xs font-mono">
+                            <span className="text-white font-medium">{g.label}</span>
+                            <span className="text-indigo-300">{g.value}%</span>
                           </div>
-                          <div className="h-1.5 rounded-full bg-paper border border-line overflow-hidden">
+                          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{
@@ -360,20 +368,20 @@ export default function PortalClient({
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-line">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted font-medium mb-3">
-                    <MapPin size={14} className="text-gold" />
-                    <span>Top Locations</span>
+                <div className="pt-4 border-t border-white/5">
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-emerald-300 font-bold mb-3">
+                    <MapPin size={14} className="text-emerald-400" />
+                    <span>Top Geographical Hotspots</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                     {locationData.length === 0 ? (
-                      <p className="text-muted col-span-2">No location data reported.</p>
+                      <p className="text-slate-400 col-span-2">No location data reported.</p>
                     ) : (
                       locationData.slice(0, 4).map((loc: any) => (
-                        <div key={loc.label} className="p-2.5 rounded-md border border-line bg-paper/50 flex justify-between items-center">
-                          <span className="text-ink font-medium truncate">{loc.label}</span>
-                          <span className="text-muted ml-2">{loc.value}</span>
+                        <div key={loc.label} className="p-3 rounded-xl border border-white/5 bg-white/[0.03] flex justify-between items-center">
+                          <span className="text-white font-medium truncate">{loc.label}</span>
+                          <span className="text-indigo-300 ml-2">{loc.value}</span>
                         </div>
                       ))
                     )}
@@ -384,31 +392,31 @@ export default function PortalClient({
 
             {/* Recent Verified Media Grid */}
             {recentMedia.length > 0 && (
-              <div className="card p-5 space-y-4">
+              <div className="rounded-3xl p-6 space-y-4 bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted font-medium">
-                    <TrendingUp size={14} className="text-gold" />
-                    <span>Recent Post Performance ({recentMedia.length} analyzed)</span>
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-indigo-300 font-bold">
+                    <TrendingUp size={14} className="text-indigo-400" />
+                    <span>Audited Posts ({recentMedia.length} analyzed)</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recentMedia.map((m: any) => (
-                    <div key={m.id} className="p-3.5 rounded-lg border border-line bg-paper/50 flex flex-col justify-between space-y-2">
-                      <p className="text-xs text-ink line-clamp-2">
+                    <div key={m.id} className="p-4 rounded-2xl border border-white/5 bg-white/[0.03] hover:border-indigo-500/30 transition-all flex flex-col justify-between space-y-3">
+                      <p className="text-xs text-slate-200 line-clamp-2">
                         {m.caption || "No caption provided"}
                       </p>
-                      <div className="pt-2 border-t border-line flex items-center justify-between text-[11px] font-mono text-muted">
-                        <span>❤️ {m.likeCount?.toLocaleString() || 0}</span>
-                        <span>💬 {m.commentsCount?.toLocaleString() || 0}</span>
+                      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
+                        <span className="text-indigo-300">❤️ {m.likeCount?.toLocaleString() || 0}</span>
+                        <span className="text-purple-300">💬 {m.commentsCount?.toLocaleString() || 0}</span>
                         {m.permalink && (
                           <a
                             href={m.permalink}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-gold hover:underline inline-flex items-center gap-0.5"
+                            className="text-white hover:text-indigo-300 inline-flex items-center gap-1 font-semibold"
                           >
-                            View <ExternalLink size={10} />
+                            View <ExternalLink size={11} />
                           </a>
                         )}
                       </div>
