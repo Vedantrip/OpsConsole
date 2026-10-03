@@ -335,3 +335,16 @@ model NotificationLog {
   @@index([recipient, sentAt])
 }
 
+model DailyTrendCache {
+  id        String   @id @default(cuid())
+  cacheKey  String   @unique
+  category  String   @default("ALL")
+  topics    Json
+  source    String   // "google_trends" | "gemini" | "curated"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cacheKey, createdAt])
+}
+
+

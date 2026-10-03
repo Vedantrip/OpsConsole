@@ -44,6 +44,7 @@ export default function AITrendingHub({
   compact = false,
 }: AITrendingHubProps) {
   const [topics, setTopics] = useState<TrendingTopic[]>(initialTopics || []);
+  const [source, setSource] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [loading, setLoading] = useState(!initialTopics);
   const [refreshing, setRefreshing] = useState(false);
@@ -67,6 +68,7 @@ export default function AITrendingHub({
       if (!res.ok) throw new Error("Failed to load trends");
       const data = await res.json();
       setTopics(data.topics || []);
+      setSource(data.source || null);
     } catch (err) {
       console.error("Error fetching AI trends:", err);
     } finally {
@@ -150,9 +152,17 @@ export default function AITrendingHub({
               <h2 className="text-sm font-semibold text-ink tracking-tight">
                 Daily AI Trend Radar
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-gold/10 text-gold border border-gold/25">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                <span>Live Insights</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-gold/10 text-gold border border-gold/25">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>
+                  {source === "google_trends"
+                    ? "Google Trends Live"
+                    : source === "cache"
+                    ? "24h Cached (0 AI Cost)"
+                    : source === "fallback"
+                    ? "Curated Seeds"
+                    : "Live Trend Engine"}
+                </span>
               </span>
             </div>
             <p className="text-xs text-muted mt-0.5">
