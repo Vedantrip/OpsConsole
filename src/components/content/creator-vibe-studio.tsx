@@ -9,15 +9,10 @@ import {
   Copy,
   Check,
   RefreshCw,
-  Rocket,
   TrendingUp,
-  Volume2,
   Award,
   ChevronRight,
-  Radio,
-  Sliders,
-  Send,
-  CheckCircle2,
+  Headphones,
 } from "lucide-react";
 
 interface HookTemplate {
@@ -132,35 +127,34 @@ export default function CreatorVibeStudio() {
       {/* Vibe & Hook Studio Bento */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: AI Viral Hook Generator (8 cols) */}
-        <div className="lg:col-span-8 rounded-3xl bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-slate-900/70 border border-indigo-500/25 p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
-          {/* Ambient Glows */}
-          <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none group-hover:bg-indigo-500/25 transition-all duration-700" />
-          <div className="absolute -bottom-16 -left-16 w-52 h-52 rounded-full bg-purple-500/15 blur-3xl pointer-events-none group-hover:bg-purple-500/25 transition-all duration-700" />
+        <div className="lg:col-span-8 rounded-2xl bg-panel/70 border border-line p-6 backdrop-blur-md shadow-sm relative overflow-hidden group">
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-gold/5 blur-3xl pointer-events-none group-hover:bg-gold/10 transition-all duration-700" />
 
-          {/* Top Pill Header */}
+          {/* Top Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10 mb-5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <Sparkles size={20} className="animate-pulse" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 text-gold flex items-center justify-center shrink-0">
+                <Sparkles size={18} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-display font-bold text-lg text-white tracking-tight">
+                  <h3 className="font-display font-bold text-base text-ink tracking-tight">
                     Viral Hook & Script Studio
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono font-bold border border-indigo-500/30 uppercase">
+                  <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30 uppercase">
                     Gen-Z AI
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">
-                  Instant high-retention 3-second openers and algorithmic angles for your talent roster.
+                <p className="text-xs text-muted">
+                  High-retention 3-second openers and retention angles for your creators.
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setRandomSeed((s) => s + 1)}
-              className="px-3 py-1.5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-white/10 transition-all self-start sm:self-auto hover:scale-105 active:scale-95"
+              className="px-3 py-1.5 rounded-lg bg-paper hover:bg-paper/80 text-muted hover:text-ink text-xs font-mono flex items-center gap-1.5 border border-line transition-all self-start sm:self-auto hover:border-gold/40"
             >
               <RefreshCw size={12} className={randomSeed ? "animate-spin-once" : ""} />
               <span>Shuffle Hooks</span>
@@ -180,10 +174,10 @@ export default function CreatorVibeStudio() {
               <button
                 key={tab.id}
                 onClick={() => setSelectedVibe(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 ${
                   selectedVibe === tab.id
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/25 scale-105"
-                    : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-white/5"
+                    ? "bg-gold text-paper font-semibold shadow-sm"
+                    : "bg-paper/60 hover:bg-paper text-muted hover:text-ink border border-line"
                 }`}
               >
                 {tab.label}
@@ -196,30 +190,30 @@ export default function CreatorVibeStudio() {
             {filteredHooks.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl bg-slate-900/60 border border-white/10 p-4 hover:border-indigo-500/40 hover:bg-slate-900/80 transition-all duration-300 relative group/card"
+                className="rounded-xl bg-paper/50 border border-line p-4 hover:border-gold/40 hover:bg-paper/80 transition-all duration-200"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 text-[10px] font-mono font-bold border border-indigo-500/25">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-gold/10 text-gold border border-gold/25">
                         {item.badge}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md bg-white/5 text-slate-400 text-[10px] font-mono">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper border border-line text-muted">
                         {item.niche}
                       </span>
                     </div>
 
-                    <p className="text-sm font-semibold text-white leading-snug">
+                    <p className="text-xs sm:text-sm font-semibold text-ink leading-snug">
                       &ldquo;{item.hook}&rdquo;
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                      <div className="flex items-center gap-1.5 text-emerald-400/90 font-mono text-[11px]">
-                        <Zap size={13} className="shrink-0 text-emerald-400" />
+                      <div className="flex items-center gap-1.5 text-emerald-500 font-mono text-[11px]">
+                        <Zap size={13} className="shrink-0" />
                         <span>{item.retentionHack}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-purple-300/90 font-mono text-[11px]">
-                        <Music size={13} className="shrink-0 text-purple-400" />
+                      <div className="flex items-center gap-1.5 text-muted font-mono text-[11px]">
+                        <Headphones size={13} className="shrink-0 text-gold" />
                         <span className="truncate">{item.soundStyle}</span>
                       </div>
                     </div>
@@ -227,13 +221,13 @@ export default function CreatorVibeStudio() {
 
                   <button
                     onClick={() => handleCopyHook(idx, item.hook)}
-                    className="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-mono flex items-center gap-1.5 border border-indigo-500/30 transition-all self-end sm:self-center shrink-0 active:scale-95"
+                    className="btn btn-secondary btn-small self-end sm:self-center shrink-0"
                     title="Copy hook to clipboard"
                   >
                     {copiedIndex === idx ? (
                       <>
-                        <Check size={13} className="text-emerald-400" />
-                        <span className="text-emerald-400 font-bold">Copied!</span>
+                        <Check size={13} className="text-emerald-500" />
+                        <span className="text-emerald-500 font-bold">Copied!</span>
                       </>
                     ) : (
                       <>
@@ -251,52 +245,52 @@ export default function CreatorVibeStudio() {
         {/* Right: Audio Trend Radar & Mojo Gauge (4 cols) */}
         <div className="lg:col-span-4 space-y-5 flex flex-col">
           {/* Creator Mojo & Momentum Gauge */}
-          <div className="rounded-3xl bg-gradient-to-br from-purple-950/40 via-slate-900/60 to-indigo-950/40 border border-purple-500/25 p-5 backdrop-blur-xl shadow-xl relative overflow-hidden">
+          <div className="rounded-2xl bg-panel/70 border border-line p-5 backdrop-blur-md shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-mono font-bold text-muted uppercase tracking-wider">
                   Live Roster Momentum
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-mono font-bold border border-purple-500/30">
-                Tier: Viral Peak
+              <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30">
+                Peak Velocity
               </span>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-baseline justify-between">
-                <span className="text-3xl font-display font-bold text-white tracking-tight">
-                  94.8<span className="text-sm font-mono text-purple-400 font-normal"> / 100</span>
+                <span className="text-3xl font-display font-bold text-ink tracking-tight">
+                  94.8<span className="text-xs font-mono text-muted font-normal"> / 100</span>
                 </span>
-                <span className="text-xs font-mono text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="text-xs font-mono text-emerald-500 font-semibold flex items-center gap-1">
                   <TrendingUp size={13} /> +12.4% this week
                 </span>
               </div>
 
               {/* Progress bar */}
-              <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden p-0.5">
-                <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-[94%] transition-all duration-1000 shadow-sm shadow-purple-500" />
+              <div className="w-full h-2 rounded-full bg-paper border border-line overflow-hidden p-0.5">
+                <div className="h-full rounded-full bg-gold w-[94%] transition-all duration-1000" />
               </div>
 
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1">
-                <span>🔥 6-Day Streak</span>
+              <div className="flex items-center justify-between text-[11px] font-mono text-muted pt-1">
+                <span>🔥 6-Day Consistency</span>
                 <span>⚡ 0 Scraping Violations</span>
               </div>
             </div>
           </div>
 
           {/* Trending Audio & Sound Styles */}
-          <div className="rounded-3xl bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 border border-white/10 p-5 backdrop-blur-xl shadow-xl flex-1 flex flex-col justify-between">
+          <div className="rounded-2xl bg-panel/70 border border-line p-5 backdrop-blur-md shadow-sm flex-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center border border-pink-500/30">
+                  <div className="w-7 h-7 rounded-lg bg-gold/15 text-gold flex items-center justify-center border border-gold/30">
                     <Music size={14} />
                   </div>
-                  <h4 className="font-display font-bold text-sm text-white">Audio Wave Radar</h4>
+                  <h4 className="font-display font-bold text-xs sm:text-sm text-ink">Audio Wave Radar</h4>
                 </div>
-                <span className="text-[10px] font-mono text-slate-400">Gen-Z Sounds</span>
+                <span className="text-[10px] font-mono text-muted">Viral Sounds</span>
               </div>
 
               <div className="space-y-2.5">
@@ -304,19 +298,19 @@ export default function CreatorVibeStudio() {
                   <div
                     key={i}
                     onClick={() => handleCopyAudio(audio.title, `${audio.bpm} · ${audio.format}`)}
-                    className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-pink-500/30 transition-all cursor-pointer group/audio"
+                    className="p-3 rounded-xl bg-paper/50 hover:bg-paper border border-line hover:border-gold/40 transition-all cursor-pointer group/audio"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="font-semibold text-xs text-white group-hover/audio:text-pink-300 transition-colors">
+                      <div className="font-semibold text-xs text-ink group-hover/audio:text-gold transition-colors">
                         {audio.title}
                       </div>
-                      <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                      <span className="text-[10px] font-mono text-emerald-500 font-bold">
                         {audio.velocity}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-1.5 text-[10px] font-mono text-slate-400">
-                      <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5">
+                    <div className="flex items-center gap-2 mt-1.5 text-[10px] font-mono text-muted">
+                      <span className="px-1.5 py-0.5 rounded bg-panel border border-line">
                         {audio.bpm}
                       </span>
                       <span className="truncate">{audio.vibe}</span>
@@ -327,7 +321,7 @@ export default function CreatorVibeStudio() {
             </div>
 
             {copiedAudio && (
-              <div className="mt-3 p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono text-center animate-fade-in">
+              <div className="mt-3 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-mono text-center animate-fade-in">
                 ✓ Copied &ldquo;{copiedAudio}&rdquo; audio cue!
               </div>
             )}

@@ -8,7 +8,6 @@ import {
   Clock3,
   Sparkles,
   Users,
-  Layers,
   Award,
   TrendingUp,
   CheckCircle2,
@@ -17,7 +16,6 @@ import {
   Rocket,
   ShieldCheck,
   ExternalLink,
-  Plus,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireContext, creatorScope } from "@/lib/access";
@@ -25,11 +23,11 @@ import AITrendingHub from "@/components/content/ai-trending-hub";
 import CreatorVibeStudio from "@/components/content/creator-vibe-studio";
 
 const statusStyles = {
-  PLANNED: "border-purple-500/30 bg-purple-500/10 text-purple-400",
-  IN_PROGRESS: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  SUBMITTED: "border-sky-500/30 bg-sky-500/10 text-sky-400",
-  APPROVED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  LIVE: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400",
+  PLANNED: "border-line bg-paper text-muted",
+  IN_PROGRESS: "border-gold/30 bg-gold/10 text-gold",
+  SUBMITTED: "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  APPROVED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  LIVE: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
 } as const;
 
 const statusLabels = {
@@ -37,7 +35,7 @@ const statusLabels = {
   IN_PROGRESS: "🎬 Filming",
   SUBMITTED: "✨ In Review",
   APPROVED: "💎 Approved",
-  LIVE: "🚀 Live / Bag Secured 💸",
+  LIVE: "🚀 Live / Paid 💸",
 } as const;
 
 function typeLabel(type: string) {
@@ -94,119 +92,119 @@ export default async function CreatorManagerDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-up relative">
-      {/* Dynamic Gen-Z Ambient Glows */}
-      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-70">
-        <div className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px] animate-pulse" />
-        <div className="absolute top-1/3 -left-32 w-[450px] h-[450px] rounded-full bg-purple-600/15 blur-[120px]" />
-        <div className="absolute bottom-10 right-10 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[100px]" />
+      {/* Background Ambient Glow matching MountLift warm theme */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-40 dark:opacity-25">
+        <div className="absolute -top-24 right-1/4 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute top-1/2 -left-20 w-80 h-80 rounded-full bg-amber-500/5 blur-3xl" />
+        <svg
+          className="absolute inset-0 w-full h-full stroke-line/40 [mask-image:radial-gradient(ellipse_at_top,white,transparent_75%)]"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="creator-grid-pattern" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M0 32V.5H32" fill="none" strokeWidth="0.75" strokeDasharray="2 2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#creator-grid-pattern)" />
+        </svg>
       </div>
 
-      {/* Hero Bento Header (Gen-Z Bubbly Style) */}
-      <div className="rounded-3xl bg-gradient-to-br from-slate-900/90 via-indigo-950/30 to-purple-950/40 border border-indigo-500/20 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
-        <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/10 blur-2xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+      {/* Hero Header */}
+      <div className="card p-6 sm:p-7 border-line bg-paper/60 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-gold/5 pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30 flex items-center gap-1.5 shadow-sm">
-                <Sparkles size={13} className="text-indigo-400 animate-spin-once" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-md bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30 flex items-center gap-1.5">
+                <Sparkles size={11} className="text-gold" />
                 <span>CREATIVE STUDIO & VIRAL OPS</span>
               </span>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-mono font-bold border border-emerald-500/25 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                <span>ROSTER IN FLOW</span>
-              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="text-[10px] font-mono text-muted uppercase">Ops Console v2</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-ink">
               Creator Launchpad & Studio
             </h1>
 
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted mt-1 max-w-2xl leading-relaxed">
               {openDeliverables
-                ? `⚡ ${openDeliverables} collab drop${openDeliverables === 1 ? "" : "s"} actively crafting in the pipeline. High engagement momentum.`
-                : "All creator collaborations, content approvals, and brand deliverables are running smoothly."}
+                ? `⚡ ${openDeliverables} collab drop${openDeliverables === 1 ? "" : "s"} actively crafting in the pipeline across brand partnerships.`
+                : "All creator collaborations, content approvals, and deliverables are running on schedule."}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap shrink-0">
+          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
             <Link
               href="/creators"
-              className="px-4 py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg"
+              className="btn btn-secondary btn-small flex items-center gap-1.5"
             >
-              <Users size={15} className="text-indigo-400" />
-              <span>Talent Roster ({creators.length})</span>
+              <Users size={13} />
+              <span>Explore Roster ({creators.length})</span>
             </Link>
             <Link
               href="/campaigns"
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-xs flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/25"
+              className="btn btn-primary btn-small flex items-center gap-1.5"
             >
-              <Rocket size={15} />
+              <Rocket size={13} />
               <span>Collab Drops ({deliverables.length})</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Bubbly Bento Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="rounded-3xl bg-gradient-to-br from-indigo-950/40 to-slate-900/80 border border-indigo-500/20 p-5 backdrop-blur-xl shadow-lg hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono font-bold text-indigo-300 uppercase tracking-wider">Creators in Focus</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-              <Users size={16} />
-            </div>
+      {/* Bento Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="card p-5 border-line bg-panel/80 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Creators in Focus</span>
+            <Users size={16} className="text-gold" />
           </div>
-          <div className="text-3xl font-display font-extrabold text-white">
+          <div className="text-3xl font-display font-bold text-ink stat-number mt-1">
             {creators.length}
           </div>
-          <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
-            <span className="text-emerald-400 font-semibold">Active talent</span> · Roster mapped
+          <div className="text-[11px] font-mono text-muted mt-1">
+            Active roster partnerships
           </div>
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-br from-amber-950/30 to-slate-900/80 border border-amber-500/20 p-5 backdrop-blur-xl shadow-lg hover:border-amber-500/40 hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider">In Production</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-              <Clapperboard size={16} />
-            </div>
+        <div className="card p-5 border-line bg-panel/80 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted font-medium">In Production</span>
+            <Clapperboard size={16} className="text-gold" />
           </div>
-          <div className="text-3xl font-display font-extrabold text-amber-400">
+          <div className="text-3xl font-display font-bold text-gold stat-number mt-1">
             {openDeliverables}
           </div>
-          <div className="text-[11px] font-mono text-slate-400 mt-1">
+          <div className="text-[11px] font-mono text-muted mt-1">
             Collab briefs & reels in edit
           </div>
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-br from-purple-950/40 to-slate-900/80 border border-purple-500/20 p-5 backdrop-blur-xl shadow-lg hover:border-purple-500/40 hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">Due This Week</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
-              <CalendarDays size={16} />
-            </div>
+        <div className="card p-5 border-line bg-panel/80 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Due This Week</span>
+            <CalendarDays size={16} className={dueSoon > 0 ? "text-viz-rose" : "text-gold"} />
           </div>
-          <div className={`text-3xl font-display font-extrabold ${dueSoon > 0 ? "text-pink-400" : "text-white"}`}>
+          <div className={`text-3xl font-display font-bold stat-number mt-1 ${dueSoon > 0 ? "text-viz-rose" : "text-ink"}`}>
             {dueSoon}
           </div>
-          <div className="text-[11px] font-mono text-slate-400 mt-1">
-            {dueSoon > 0 ? "⚡ Priority drops next 7 days" : "Clean calendar ahead"}
+          <div className="text-[11px] font-mono text-muted mt-1">
+            {dueSoon > 0 ? "⚡ Priority drops next 7 days" : "Landing in next 7 days"}
           </div>
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-br from-emerald-950/30 to-slate-900/80 border border-emerald-500/20 p-5 backdrop-blur-xl shadow-lg hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider">Graph Verified</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <ShieldCheck size={16} />
-            </div>
+        <div className="card p-5 border-line bg-panel/80 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Graph Verified</span>
+            <Award size={16} className="text-emerald-500" />
           </div>
-          <div className="text-3xl font-display font-extrabold text-emerald-400">
+          <div className="text-3xl font-display font-bold text-emerald-500 stat-number mt-1">
             {igReady}
           </div>
-          <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
-            <span className="text-emerald-400 font-semibold">100% official API</span> · Zero scrape
+          <div className="text-[11px] font-mono text-muted mt-1">
+            Official Graph API intelligence
           </div>
         </div>
       </div>
@@ -225,73 +223,66 @@ export default async function CreatorManagerDashboard() {
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-indigo-400 uppercase tracking-wider">Production Runway</span>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono">Live Drops</span>
-            </div>
-            <h2 className="text-xl font-display font-bold text-white mt-0.5">Collab Drops & Deliverables</h2>
+            <p className="eyebrow">Production Runway</p>
+            <h2 className="text-base font-display font-semibold text-ink">Collab Drops & Deliverables</h2>
           </div>
-          <Link href="/campaigns" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold transition-colors">
-            <span>Explore all campaign deals</span> <ArrowRight size={13} />
+          <Link href="/campaigns" className="text-xs text-gold hover:underline flex items-center gap-1 font-medium">
+            <span>Explore all campaigns</span> <ArrowRight size={12} />
           </Link>
         </div>
 
-        <div className="rounded-3xl overflow-hidden bg-slate-900/60 border border-white/10 backdrop-blur-xl shadow-xl">
+        <div className="card overflow-hidden bg-paper/50 backdrop-blur-sm border-line">
           {deliverables.length === 0 ? (
-            <div className="p-12 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mx-auto">
-                <CheckCircle2 size={24} />
-              </div>
-              <p className="text-base font-bold text-white">All caught up! No pending creator drops.</p>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                When new brand briefs are assigned to creators, live production cards will update right here.
-              </p>
+            <div className="p-10 text-center space-y-2">
+              <CheckCircle2 size={24} className="mx-auto text-gold mb-2 opacity-70" />
+              <p className="text-sm font-semibold text-ink">All caught up! No pending creator drops.</p>
+              <p className="text-xs text-muted">When new brand briefs are assigned to creators, upcoming deliverables will land right here.</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-line">
               {deliverables.map((d) => {
                 const overdue = d.dueDate && d.dueDate.getTime() < Date.now() && !["LIVE", "APPROVED"].includes(d.status);
                 return (
                   <Link
                     key={d.id}
                     href={`/campaigns/${d.campaign.id}`}
-                    className="group block px-5 py-4 hover:bg-white/[0.04] transition-all"
+                    className="group block px-4 py-3.5 sm:px-5 hover:bg-paper/80 transition-colors"
                   >
                     <div className="flex items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="shrink-0 w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Clapperboard size={18} />
+                        <div className="shrink-0 w-9 h-9 rounded-lg bg-paper border border-line text-muted flex items-center justify-center group-hover:border-gold/40 group-hover:text-gold transition-colors">
+                          <Clapperboard size={16} />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold text-white">{typeLabel(d.type)}</span>
-                            <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-mono font-bold ${statusStyles[d.status]}`}>
+                            <span className="text-sm font-medium text-ink">{typeLabel(d.type)}</span>
+                            <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-medium ${statusStyles[d.status]}`}>
                               {statusLabels[d.status]}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 truncate flex items-center gap-1.5 flex-wrap">
-                            <span className="text-slate-200 font-semibold">{d.creator.name}</span>
-                            <span className="text-slate-600">·</span>
-                            <span className="text-indigo-300">{d.campaign.name}</span>
-                            <span className="text-slate-600">·</span>
-                            <span className="text-slate-400">{d.campaign.brand.name}</span>
+                          <p className="text-xs text-muted mt-0.5 truncate flex items-center gap-1.5 flex-wrap">
+                            <span className="text-ink font-medium">{d.creator.name}</span>
+                            <span className="text-line">·</span>
+                            <span className="text-gold">{d.campaign.name}</span>
+                            <span className="text-line">·</span>
+                            <span>{d.campaign.brand.name}</span>
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
                         <div
-                          className={`text-right text-xs font-mono px-3 py-1 rounded-xl border ${
+                          className={`text-right text-xs font-mono px-2.5 py-1 rounded-md border ${
                             overdue
-                              ? "bg-pink-500/15 text-pink-300 border-pink-500/30 font-bold animate-pulse"
-                              : "bg-white/5 text-slate-300 border-white/10"
+                              ? "bg-viz-rose/10 text-viz-rose border-viz-rose/30 font-medium"
+                              : "bg-paper text-muted border-line"
                           }`}
                         >
                           {dueLabel(d.dueDate)}
                         </div>
                         <ChevronRight
-                          size={16}
-                          className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all"
+                          size={15}
+                          className="text-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all"
                         />
                       </div>
                     </div>
@@ -302,9 +293,9 @@ export default async function CreatorManagerDashboard() {
           )}
 
           {deliverables.length > 0 && (
-            <div className="px-6 py-3 border-t border-white/5 bg-white/[0.02] flex items-center gap-2 text-xs text-slate-400 font-mono">
-              <Clock3 size={13} className="text-indigo-400" />
-              <span>Ordered by delivery urgency · Real-time status sync</span>
+            <div className="px-5 py-2.5 border-t border-line bg-paper/40 flex items-center gap-2 text-[11px] text-muted font-mono">
+              <Clock3 size={13} />
+              <span>Showing next {deliverables.length} upcoming deliverable{deliverables.length === 1 ? "" : "s"}, ordered by deadline.</span>
             </div>
           )}
         </div>
@@ -314,17 +305,17 @@ export default async function CreatorManagerDashboard() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">Talent Showcase</div>
-            <h2 className="text-xl font-display font-bold text-white mt-0.5">Creator Roster Spotlight</h2>
+            <p className="eyebrow">Talent Roster</p>
+            <h2 className="text-base font-display font-semibold text-ink">Creator Spotlight</h2>
           </div>
-          <Link href="/creators" className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold transition-colors">
-            <span>View all {creators.length} creators</span> <ArrowRight size={13} />
+          <Link href="/creators" className="text-xs text-gold hover:underline flex items-center gap-1 font-medium">
+            <span>View all {creators.length} creators</span> <ArrowRight size={12} />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {creators.length === 0 ? (
-            <div className="col-span-full rounded-3xl bg-slate-900/60 border border-white/10 p-8 text-center text-sm text-slate-400">
+            <div className="col-span-full card p-6 text-center text-sm text-muted">
               No creators in your roster yet. Click Creators tab to onboard talent.
             </div>
           ) : (
@@ -335,42 +326,37 @@ export default async function CreatorManagerDashboard() {
                 <Link
                   key={c.id}
                   href={`/creators/${c.id}`}
-                  className="group rounded-3xl bg-gradient-to-br from-slate-900/80 via-slate-900/50 to-indigo-950/30 border border-white/10 p-5 hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300 shadow-xl flex flex-col justify-between"
+                  className="card p-4 flex flex-col justify-between hover:border-gold/50 transition-all duration-200 bg-paper/40 hover:bg-paper/70"
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 font-display font-bold text-sm uppercase flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          {c.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors truncate">
-                            {c.name}
-                          </div>
-                          <div className="text-xs text-slate-400 font-mono truncate">
-                            {c.handle ? (c.handle.startsWith("@") ? c.handle : `@${c.handle}`) : "No handle"}
-                          </div>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-lg bg-gold/10 border border-gold/25 text-gold flex items-center justify-center font-display font-semibold text-xs uppercase shrink-0">
+                        {c.name.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-ink truncate">{c.name}</div>
+                        <div className="text-xs text-muted font-mono truncate">
+                          {c.handle ? (c.handle.startsWith("@") ? c.handle : `@${c.handle}`) : "No handle"}
                         </div>
                       </div>
-
-                      {score != null && (
-                        <div className="text-right shrink-0">
-                          <div className="text-base font-display font-extrabold text-indigo-300">
-                            {score}
-                          </div>
-                          <div className="text-[9px] font-mono text-slate-400 uppercase">ML Score</div>
-                        </div>
-                      )}
                     </div>
+
+                    {score != null && (
+                      <div className="text-right shrink-0">
+                        <div className="text-sm font-display font-bold text-gold">
+                          {score}
+                        </div>
+                        <div className="text-[9px] font-mono text-muted uppercase">Score</div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-                    <span className="px-2 py-0.5 rounded-lg bg-white/5 text-slate-400 border border-white/5">
-                      {c._count.deliverables} deals
-                    </span>
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <Flame size={12} />
-                      {insight?.engagementRate != null ? `${insight.engagementRate.toFixed(1)}% ER` : "Ready"}
+                  <div className="pt-2.5 border-t border-line flex items-center justify-between text-xs font-mono">
+                    <span className="text-muted">{c._count.deliverables} deals</span>
+                    <span className={insight ? "text-gold font-medium" : "text-muted"}>
+                      {insight?.engagementRate != null
+                        ? `${insight.engagementRate.toFixed(1)}% ER`
+                        : "Ready"}
                     </span>
                   </div>
                 </Link>
@@ -382,25 +368,21 @@ export default async function CreatorManagerDashboard() {
 
       {/* Team Notes & Agency Quick Briefs */}
       {updates.length > 0 && (
-        <section className="rounded-3xl bg-slate-900/60 border border-white/10 p-6 backdrop-blur-xl">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">
-              Team Briefs & Operational Directives
-            </h3>
-            <span className="px-2 py-0.5 rounded-full bg-white/5 text-slate-400 text-[10px] font-mono border border-white/10">
-              DIRECT DISPATCH
-            </span>
+        <div className="card overflow-hidden bg-paper/50 backdrop-blur-sm">
+          <div className="px-5 py-3 border-b border-line flex items-center justify-between bg-paper/30">
+            <h2 className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Team Briefs & Operational Directives</h2>
+            <span className="text-[10px] font-mono text-muted bg-paper px-2 py-0.5 rounded border border-line">DIRECT DISPATCH</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="divide-y divide-line">
             {updates.map((u) => (
-              <div key={u.id} className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1.5">
-                <h4 className="text-sm font-bold text-white">{u.title}</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">{u.body}</p>
-                <span className="text-[10px] font-mono text-slate-500 block pt-1">{u.createdAt.toLocaleDateString()}</span>
-              </div>
+              <article key={u.id} className="px-5 py-3.5 space-y-1">
+                <h3 className="text-sm font-semibold text-ink">{u.title}</h3>
+                <p className="text-xs text-muted whitespace-pre-wrap leading-relaxed">{u.body}</p>
+                <time className="text-[10px] font-mono text-muted block pt-1">{u.createdAt.toLocaleDateString()}</time>
+              </article>
             ))}
           </div>
-        </section>
+        </div>
       )}
     </div>
   );
