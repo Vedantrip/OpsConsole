@@ -90,6 +90,9 @@ export default async function CreatorManagerDashboard() {
     (d) => d.dueDate && !["LIVE", "APPROVED"].includes(d.status) && (d.dueDate.getTime() - Date.now()) / 86_400_000 <= 7
   ).length;
 
+  const scoresWithValues = creators.map((c) => c.mountliftScore || c.insights[0]?.overallScore).filter((s): s is number => s != null);
+  const averageScore = scoresWithValues.length > 0 ? scoresWithValues.reduce((a, b) => a + b, 0) / scoresWithValues.length : null;
+
   return (
     <div className="space-y-8 animate-fade-up relative">
       {/* Background Ambient Glow matching MountLift warm theme */}
@@ -211,7 +214,12 @@ export default async function CreatorManagerDashboard() {
 
       {/* Interactive Gen-Z Vibe Studio (Hook Generator + Audio Radar) */}
       <section>
-        <CreatorVibeStudio />
+        <CreatorVibeStudio
+          averageScore={averageScore}
+          activeRosterCount={creators.length}
+          verifiedCount={igReady}
+          openDeliverablesCount={openDeliverables}
+        />
       </section>
 
       {/* Daily AI Trending Topics Radar */}

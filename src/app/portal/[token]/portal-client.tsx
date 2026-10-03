@@ -294,7 +294,11 @@ export default function PortalClient({
 
             {/* Interactive Viral Hook & Script Studio */}
             <section>
-              <CreatorVibeStudio />
+              <CreatorVibeStudio
+                averageScore={scores.overall}
+                activeRosterCount={1}
+                verifiedCount={isConnected ? 1 : 0}
+              />
             </section>
 
             {/* Demographics Row (Age, Gender, Geography) */}
