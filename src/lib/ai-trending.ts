@@ -78,9 +78,14 @@ async function fetchFromGemini(
 ): Promise<TrendingTopic[]> {
   const prompt = buildTrendingPrompt(params);
 
-  // Gemini 3.8 Flash is the primary model. Free-tier capacity can temporarily
-  // return 503, so retry once and then fall back to the cheaper Flash-Lite model.
-  const models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"];
+  // High-capacity free tier models: gemini-1.5-flash & gemini-2.0-flash offer 1,500 requests/day
+  // (compared to gemini-3.8-flash preview which is capped at only 20 requests/day).
+  const models = [
+    "gemini-1.5-flash",
+    "gemini-2.0-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-1.5-flash-8b",
+  ];
   let lastError: Error | null = null;
 
   for (const model of models) {
