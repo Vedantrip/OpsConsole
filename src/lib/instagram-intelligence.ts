@@ -64,7 +64,25 @@ function clamp(value: number, min = 0, max = 100) {
 
 function engagementScore(performance: any) {
   const rate = Number(performance?.engagementRate);
-  return Number.isFinite(rate) ? clamp((rate / 8) * 100) : null;
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+
+  // Realistic Instagram Engagement Rate Curves:
+  // >= 5.0% ER = 92 - 100 (Viral Top Tier)
+  // 3.0% - 5.0% ER = 82 - 92 (High Engagement)
+  // 1.8% - 3.0% ER = 70 - 82 (Solid Average)
+  // 1.0% - 1.8% ER = 55 - 70 (Developing)
+  // < 1.0% ER = 25 - 55 (Low)
+  if (rate >= 5.0) {
+    return clamp(92 + ((rate - 5.0) / 3.0) * 8);
+  } else if (rate >= 3.0) {
+    return clamp(82 + ((rate - 3.0) / 2.0) * 10);
+  } else if (rate >= 1.8) {
+    return clamp(70 + ((rate - 1.8) / 1.2) * 12);
+  } else if (rate >= 1.0) {
+    return clamp(55 + ((rate - 1.0) / 0.8) * 15);
+  } else {
+    return clamp(25 + (rate / 1.0) * 30);
+  }
 }
 
 function audienceScore(audience: any) {
@@ -72,34 +90,84 @@ function audienceScore(audience: any) {
     .filter((value) => Array.isArray(value) && value.length > 0).length;
   if (signalCount === 0) return null;
   const confidence = String(audience?.confidence || "medium").toLowerCase();
-  const base = confidence === "high" ? 88 : confidence === "low" ? 52 : 70;
-  return clamp(base + signalCount * 3);
+  const base = confidence === "high" ? 85 : confidence === "low" ? 60 : 75;
+  return clamp(base + signalCount * 3.5);
 }
 
 function contentScore(performance: any) {
   const ratio = Number(performance?.viewToFollowerRatio);
-  if (Number.isFinite(ratio) && ratio > 0) return clamp((ratio / 0.75) * 100);
   const views = Number(performance?.avgViews);
-  return Number.isFinite(views) && views > 0 ? clamp(55 + Math.log10(views + 1) * 5) : null;
+  const avgLikes = Number(performance?.avgLikes);
+
+  // If view-to-follower ratio is available
+  if (Number.isFinite(ratio) && ratio > 0) {
+    // 30%+ ratio is viral, 15-30% is high, 8-15% is standard, <8% is low
+    if (ratio >= 0.30) {
+      return clamp(88 + ((ratio - 0.30) / 0.30) * 12);
+    } else if (ratio >= 0.15) {
+      return clamp(78 + ((ratio - 0.15) / 0.15) * 10);
+    } else if (ratio >= 0.08) {
+      return clamp(65 + ((ratio - 0.08) / 0.07) * 13);
+    } else {
+      return clamp(35 + (ratio / 0.08) * 30);
+    }
+  }
+
+  // Fallback to absolute views & likes velocity
+  const effectiveViews = views > 0 ? views : (avgLikes > 0 ? avgLikes * 12 : 0);
+  if (effectiveViews > 0) {
+    if (effectiveViews >= 100_000) {
+      return clamp(90 + Math.min(10, Math.log10(effectiveViews / 100_000) * 6));
+    } else if (effectiveViews >= 20_000) {
+      return clamp(80 + ((effectiveViews - 20_000) / 80_000) * 10);
+    } else if (effectiveViews >= 5_000) {
+      return clamp(68 + ((effectiveViews - 5_000) / 15_000) * 12);
+    } else {
+      return clamp(40 + (effectiveViews / 5_000) * 28);
+    }
+  }
+
+  return null;
 }
 
 function consistencyScore(performance: any) {
+  const days = Number(performance?.postingFrequencyDays);
   const label = String(performance?.consistency || "").toLowerCase();
-  if (!label || label === "unknown") return null;
+
+  if (Number.isFinite(days) && days > 0) {
+    if (days <= 2.5) return 95; // 3+ posts per week
+    if (days <= 4.0) return 88; // 2 posts per week
+    if (days <= 7.0) return 78; // Weekly post
+    if (days <= 14.0) return 65; // Bi-weekly
+    return clamp(60 - (days - 14) * 1.5, 30, 60);
+  }
+
   if (label.includes("very consistent")) return 95;
   if (label === "consistent") return 88;
-  if (label.includes("somewhat")) return 68;
-  if (label.includes("highly inconsistent")) return 35;
-  return 60;
+  if (label.includes("somewhat")) return 74;
+  if (label.includes("highly inconsistent")) return 40;
+  return 70;
 }
 
 function profileScore(profile: any) {
-  let score = 50;
-  if (profile?.profileUrl) score += 15;
-  if (profile?.verified) score += 20;
-  if (Number(profile?.followers) > 0) score += 10;
-  if (Number(profile?.posts) > 0) score += 5;
-  return clamp(score);
+  let score = 55;
+  if (profile?.profileUrl || profile?.externalUrl) score += 12;
+  if (profile?.verified || profile?.isVerified) score += 15;
+  
+  const followers = Number(profile?.followers || profile?.followerCount || 0);
+  if (followers >= 500_000) score += 18;
+  else if (followers >= 100_000) score += 14;
+  else if (followers >= 10_000) score += 10;
+  else if (followers > 0) score += 6;
+
+  const posts = Number(profile?.posts || profile?.postsCount || 0);
+  if (posts >= 100) score += 8;
+  else if (posts >= 30) score += 5;
+  else if (posts > 0) score += 3;
+
+  if (profile?.fullName || profile?.biography) score += 5;
+
+  return clamp(score, 30, 100);
 }
 
 export function normalizeAudience(rawResponse: unknown) {

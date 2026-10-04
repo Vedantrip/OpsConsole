@@ -63,7 +63,7 @@ export async function extractInsightMetrics(rawData: any) {
     profileUrl: typeof profile.profileUrl === "string" ? profile.profileUrl : null,
     overallScore: parseNum(scores.overall), engagementScore: parseNum(scores.engagement),
     audienceScore: parseNum(scores.audience), contentQualityScore: parseNum(scores.content),
-    consistencyScore: parseNum(scores.consistency), audienceData,
+    consistencyScore: parseNum(scores.consistency), profileScore: parseNum(scores.profile), audienceData,
     topLocations: audienceData.locations, interests: audienceData.interests,
     ageDistribution: audienceData.age, genderDistribution: audienceData.gender,
     source: audienceData.source, sourceVersion: audience.sourceVersion ?? scores.methodology ?? null,
@@ -106,6 +106,24 @@ async function createInsightSnapshot(creatorId: string, rawData: any) {
       source: metrics.source, sourceVersion: metrics.sourceVersion, raw: rawData,
     },
   });
+
+  if (metrics.overallScore !== null) {
+    await prisma.creator.update({
+      where: { id: creatorId },
+      data: {
+        mountliftScore: metrics.overallScore,
+        engagementScore: metrics.engagementScore,
+        audienceScore: metrics.audienceScore,
+        contentScore: metrics.contentQualityScore,
+        consistencyScore: metrics.consistencyScore,
+        profileScore: metrics.profileScore,
+        scoreCalculatedAt: new Date(),
+      },
+    }).catch((err) => {
+      console.warn("Failed to sync scores to Creator:", err);
+    });
+  }
+
   revalidatePath("/insights");
   revalidatePath(`/creators/${creatorId}`);
   revalidatePath("/creators");

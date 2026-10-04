@@ -102,6 +102,16 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
     const likes = typeof reel.likesCount === "number" && reel.likesCount >= 0 ? reel.likesCount : null;
     const comments = typeof reel.commentsCount === "number" ? reel.commentsCount : 0;
     const engagement = likes === null ? null : likes + comments;
+
+    let engagementRate: number | null = null;
+    if (engagement !== null) {
+      if (views && views > 0) {
+        engagementRate = engagement / views;
+      } else if (followerCount && followerCount > 0) {
+        engagementRate = engagement / followerCount;
+      }
+    }
+
     return {
       shortCode: reel.shortCode || null,
       url: reel.url || reel.inputUrl || null,
@@ -112,7 +122,7 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
       comments,
       likesHidden: reel.likesCount === -1,
       engagement,
-      engagementRate: engagement !== null && views ? engagement / views : null,
+      engagementRate,
     };
   });
 
@@ -126,6 +136,15 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
   const averageDaysBetweenPosts = gaps.length ? mean(gaps) : null;
   const viewToFollowerRatio = followerCount && followerCount > 0 && averageViews > 0 ? averageViews / followerCount : null;
 
+  let calculatedAvgER: number | null = null;
+  if (validEngagementRates.length > 0) {
+    calculatedAvgER = round(mean(validEngagementRates) * 100, 2);
+  } else if (followerCount && followerCount > 0 && validLikes.length > 0) {
+    const avgLikes = mean(validLikes);
+    const avgComments = mean(perReel.map((reel) => reel.comments));
+    calculatedAvgER = round(((avgLikes + avgComments) / followerCount) * 100, 2);
+  }
+
   return {
     username,
     reelsAnalyzed: perReel.length,
@@ -134,7 +153,7 @@ export function computeMetricsForUsername(username: string, rawReels: RawReel[],
     medianViews: round(median(validViews)),
     avgLikes: round(mean(validLikes)),
     avgComments: round(mean(perReel.map((reel) => reel.comments))),
-    avgEngagementRatePct: validEngagementRates.length ? round(mean(validEngagementRates) * 100, 2) : null,
+    avgEngagementRatePct: calculatedAvgER,
     consistency: {
       stdDevViews: round(standardDeviation(validViews)),
       coefficientOfVariation: coefficientOfVariation === null ? null : round(coefficientOfVariation, 2),
