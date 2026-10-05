@@ -21,6 +21,7 @@ import { prisma } from "@/lib/prisma";
 import { requireContext, creatorScope } from "@/lib/access";
 import AITrendingHub from "@/components/content/ai-trending-hub";
 import CreatorVibeStudio from "@/components/content/creator-vibe-studio";
+import TeamDirectivesBanner from "@/components/dashboards/team-directives-banner";
 
 const statusStyles = {
   PLANNED: "border-line bg-paper text-muted",
@@ -111,6 +112,13 @@ export default async function CreatorManagerDashboard() {
           <rect width="100%" height="100%" fill="url(#creator-grid-pattern)" />
         </svg>
       </div>
+
+      {/* Top Admin Directives & Team Announcements Banner with "!" indicator */}
+      {updates.length > 0 && (
+        <section>
+          <TeamDirectivesBanner updates={updates} />
+        </section>
+      )}
 
       {/* Hero Header */}
       <div className="card p-6 sm:p-7 border-line bg-paper/60 backdrop-blur-sm relative overflow-hidden">
@@ -373,25 +381,6 @@ export default async function CreatorManagerDashboard() {
           )}
         </div>
       </section>
-
-      {/* Team Notes & Agency Quick Briefs */}
-      {updates.length > 0 && (
-        <div className="card overflow-hidden bg-paper/50 backdrop-blur-sm">
-          <div className="px-5 py-3 border-b border-line flex items-center justify-between bg-paper/30">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-muted font-medium">Team Briefs & Operational Directives</h2>
-            <span className="text-[10px] font-mono text-muted bg-paper px-2 py-0.5 rounded border border-line">DIRECT DISPATCH</span>
-          </div>
-          <div className="divide-y divide-line">
-            {updates.map((u) => (
-              <article key={u.id} className="px-5 py-3.5 space-y-1">
-                <h3 className="text-sm font-semibold text-ink">{u.title}</h3>
-                <p className="text-xs text-muted whitespace-pre-wrap leading-relaxed">{u.body}</p>
-                <time className="text-[10px] font-mono text-muted block pt-1">{u.createdAt.toLocaleDateString()}</time>
-              </article>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
