@@ -190,11 +190,15 @@ const ALL_HOOKS: HookTemplate[] = [
   },
 ];
 
-interface CreatorVibeStudioProps {
+export interface CreatorVibeStudioProps {
   averageScore?: number | null;
   activeRosterCount?: number;
   verifiedCount?: number;
   openDeliverablesCount?: number;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+  hideMomentumBanner?: boolean;
+  title?: string;
 }
 
 export default function CreatorVibeStudio({
@@ -202,7 +206,12 @@ export default function CreatorVibeStudio({
   activeRosterCount = 0,
   verifiedCount = 0,
   openDeliverablesCount = 0,
+  collapsible = false,
+  defaultOpen = false,
+  hideMomentumBanner = false,
+  title = "Viral Hook & Script Studio",
 }: CreatorVibeStudioProps) {
+  const [isOpen, setIsOpen] = useState(!collapsible || defaultOpen);
   const [selectedVibe, setSelectedVibe] = useState<string>("ALL");
   const [selectedNiche, setSelectedNiche] = useState<string>("ALL");
   const [expandedHookId, setExpandedHookId] = useState<string | null>(null);
@@ -265,338 +274,377 @@ Generated via MountLift Ops Creative Studio`;
   const displayScore = hasScore ? Math.round(averageScore! * 10) / 10 : null;
 
   let scoreTier = "Awaiting Talent";
-  let scoreColor = "text-muted";
   let progressWidth = 0;
 
   if (!hasRoster) {
     scoreTier = "No Roster Active";
-    scoreColor = "text-muted";
     progressWidth = 0;
   } else if (!hasScore) {
     scoreTier = "Audits Pending";
-    scoreColor = "text-amber-400";
     progressWidth = 15;
   } else {
     progressWidth = Math.min(100, Math.max(10, displayScore!));
     if (displayScore! >= 90) {
       scoreTier = "A+ Tier 1% Elite";
-      scoreColor = "text-gold";
     } else if (displayScore! >= 80) {
       scoreTier = "High Impact Roster";
-      scoreColor = "text-emerald-500";
     } else if (displayScore! >= 70) {
       scoreTier = "Solid Growth";
-      scoreColor = "text-sky-400";
     } else {
       scoreTier = "Roster Developing";
-      scoreColor = "text-amber-400";
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Banner: Live Roster Momentum Metric (Real Data Sync) */}
-      <div className="rounded-2xl bg-gradient-to-r from-panel/90 via-paper/70 to-panel/90 border border-line p-5 sm:p-6 backdrop-blur-md shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-32 bg-gold/5 blur-3xl pointer-events-none" />
+      {!hideMomentumBanner && (
+        <div className="rounded-2xl bg-gradient-to-r from-panel/90 via-paper/70 to-panel/90 border border-line p-5 sm:p-6 backdrop-blur-md shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-32 bg-gold/5 blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-2.5">
-              <span className={`w-2.5 h-2.5 rounded-full ${hasRoster ? "bg-emerald-500 animate-pulse" : "bg-muted"}`} />
-              <span className="text-xs font-mono font-bold text-muted uppercase tracking-wider">
-                Live Roster Momentum
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30">
-                {scoreTier}
-              </span>
-            </div>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center gap-2.5">
+                <span className={`w-2.5 h-2.5 rounded-full ${hasRoster ? "bg-emerald-500 animate-pulse" : "bg-muted"}`} />
+                <span className="text-xs font-mono font-bold text-muted uppercase tracking-wider">
+                  Live Roster Momentum
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30">
+                  {scoreTier}
+                </span>
+              </div>
 
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl sm:text-4xl font-display font-black text-ink tracking-tight">
-                {displayScore != null ? displayScore : "—"}
-                <span className="text-sm font-mono text-muted font-normal"> / 100</span>
-              </span>
-              <span className="text-xs font-mono text-muted">
-                {hasRoster
-                  ? `${activeRosterCount} Creator${activeRosterCount === 1 ? "" : "s"} on Roster · ${openDeliverablesCount} Deals in Flight`
-                  : "Add your first creator in the Creators tab to calculate live momentum"}
-              </span>
-            </div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl sm:text-4xl font-display font-black text-ink tracking-tight">
+                  {displayScore != null ? displayScore : "—"}
+                  <span className="text-sm font-mono text-muted font-normal"> / 100</span>
+                </span>
+                <span className="text-xs font-mono text-muted">
+                  {hasRoster
+                    ? `${activeRosterCount} Creator${activeRosterCount === 1 ? "" : "s"} on Roster · ${openDeliverablesCount} Deals in Flight`
+                    : "Add creators in the Creators tab to calculate live momentum"}
+                </span>
+              </div>
 
-            {/* Real Progress Bar */}
-            <div className="w-full max-w-xl h-2 rounded-full bg-paper border border-line overflow-hidden p-0.5">
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${
-                  hasScore ? "bg-gradient-to-r from-gold to-amber-400" : "bg-muted/30"
-                }`}
-                style={{ width: `${progressWidth}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0 flex-wrap lg:border-l lg:border-line lg:pl-6">
-            <div className="p-3 rounded-xl bg-paper/60 border border-line min-w-[130px]">
-              <div className="text-[10px] font-mono text-muted uppercase">Verified APIs</div>
-              <div className="text-lg font-display font-bold text-emerald-500 flex items-center gap-1.5 mt-0.5">
-                <Award size={16} />
-                <span>{verifiedCount}</span>
+              {/* Real Progress Bar */}
+              <div className="w-full max-w-xl h-2 rounded-full bg-paper border border-line overflow-hidden p-0.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ${
+                    hasScore ? "bg-gradient-to-r from-gold to-amber-400" : "bg-muted/30"
+                  }`}
+                  style={{ width: `${progressWidth}%` }}
+                />
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-paper/60 border border-line min-w-[130px]">
-              <div className="text-[10px] font-mono text-muted uppercase">Roster Status</div>
-              <div className="text-lg font-display font-bold text-ink flex items-center gap-1.5 mt-0.5">
-                <TrendingUp size={16} className="text-gold" />
-                <span>{hasRoster ? "Active" : "Standby"}</span>
+            <div className="flex items-center gap-3 sm:gap-4 shrink-0 flex-wrap lg:border-l lg:border-line lg:pl-6">
+              <div className="p-3 rounded-xl bg-paper/60 border border-line min-w-[130px]">
+                <div className="text-[10px] font-mono text-muted uppercase">Verified APIs</div>
+                <div className="text-lg font-display font-bold text-emerald-500 flex items-center gap-1.5 mt-0.5">
+                  <Award size={16} />
+                  <span>{verifiedCount}</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-paper/60 border border-line min-w-[130px]">
+                <div className="text-[10px] font-mono text-muted uppercase">Roster Status</div>
+                <div className="text-lg font-display font-bold text-ink flex items-center gap-1.5 mt-0.5">
+                  <TrendingUp size={16} className="text-gold" />
+                  <span>{hasRoster ? "Active" : "Standby"}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Studio: Viral Hook & Script Studio (Aesthetic Redesign) */}
-      <div className="rounded-3xl bg-panel/75 border border-line p-6 sm:p-7 backdrop-blur-md shadow-sm relative overflow-hidden group">
-        {/* Ambient Warm Studio Glows */}
-        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gold/10 blur-3xl pointer-events-none group-hover:bg-gold/15 transition-all duration-700" />
-        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-amber-500/5 blur-3xl pointer-events-none" />
-
-        {/* Studio Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 mb-6 pb-5 border-b border-line">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold/25 via-amber-500/15 to-transparent border border-gold/40 text-gold flex items-center justify-center shrink-0 shadow-md">
-              <Clapperboard size={22} className="text-gold animate-subtle-float" />
+      {/* Collapsed Trigger Bar (Saves dashboard space when collapsed) */}
+      {collapsible && !isOpen ? (
+        <div className="rounded-2xl border border-line bg-panel/75 hover:bg-panel p-4 sm:p-5 backdrop-blur-md shadow-sm transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 text-gold flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Clapperboard size={18} />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-display font-bold text-lg text-ink tracking-tight">
-                  Viral Hook & Script Studio
+                <h3 className="font-display font-bold text-sm sm:text-base text-ink tracking-tight">
+                  {title}
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30 uppercase tracking-wide">
-                  2026 Production Blueprints
+                <span className="px-2 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30">
+                  {ALL_HOOKS.length} Blueprints
                 </span>
               </div>
-              <p className="text-xs text-muted mt-0.5">
-                High-retention 3-second openers, camera shot-lists, and conversion script angles.
+              <p className="text-xs text-muted truncate mt-0.5">
+                3-second retention openers, camera shot-lists, and conversion script angles.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            <button
-              onClick={() => setShuffleSeed((s) => s + 1)}
-              className="px-3.5 py-2 rounded-xl bg-paper hover:bg-paper/80 text-ink hover:text-gold text-xs font-mono font-medium flex items-center gap-2 border border-line hover:border-gold/40 transition-all shadow-sm"
-              title="Rotate fresh set of viral frameworks"
-            >
-              <RefreshCw size={13} className={shuffleSeed ? "animate-spin-once text-gold" : "text-muted"} />
-              <span>Rotate Angles</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="px-4 py-2 rounded-xl bg-paper hover:bg-gold hover:text-paper text-ink text-xs font-mono font-medium border border-line hover:border-gold/40 flex items-center gap-2 transition-all shrink-0 self-start sm:self-auto shadow-sm"
+          >
+            <Sparkles size={13} className="text-gold group-hover:text-paper" />
+            <span>Open Studio</span>
+            <ChevronDown size={14} />
+          </button>
         </div>
+      ) : (
+        /* Full Main Studio */
+        <div className="rounded-3xl bg-panel/75 border border-line p-6 sm:p-7 backdrop-blur-md shadow-sm relative overflow-hidden group animate-fade-in">
+          {/* Ambient Warm Studio Glows */}
+          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gold/10 blur-3xl pointer-events-none group-hover:bg-gold/15 transition-all duration-700" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-amber-500/5 blur-3xl pointer-events-none" />
 
-        {/* Dual Filter Controls: Vibes & Niches */}
-        <div className="space-y-3 mb-6 relative z-10">
-          {/* Vibe Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {[
-              { id: "ALL", label: "✨ All Frameworks" },
-              { id: "POV", label: "🎬 POV Angles" },
-              { id: "VIRAL_OPENER", label: "⚡ 3-Sec Hooks" },
-              { id: "SECRET_SAUCE", label: "🤫 Secret Sauce" },
-              { id: "CONTROVERSIAL", label: "💥 Hot Takes" },
-              { id: "STORYTIME", label: "📖 Storytime Spikes" },
-              { id: "CTA_HACK", label: "🎯 High-Converting CTAs" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedVibe(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                  selectedVibe === tab.id
-                    ? "bg-gold text-paper font-semibold shadow-md shadow-gold/10"
-                    : "bg-paper/60 hover:bg-paper text-muted hover:text-ink border border-line"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Niche Selector Filter */}
-          <div className="flex items-center gap-2 text-xs font-mono text-muted flex-wrap pt-1">
-            <span className="flex items-center gap-1 text-gold">
-              <SlidersHorizontal size={11} /> Niche:
-            </span>
-            {["ALL", "Tech & AI", "Lifestyle & Beauty", "Finance & Wealth", "Fitness & Health", "Content & Growth"].map((n) => (
-              <button
-                key={n}
-                onClick={() => setSelectedNiche(n)}
-                className={`px-2 py-0.5 rounded-md text-[11px] transition-colors ${
-                  selectedNiche === n
-                    ? "bg-gold/15 text-gold font-bold border border-gold/30"
-                    : "hover:text-ink text-muted"
-                }`}
-              >
-                {n === "ALL" ? "All Niches" : n}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Dynamic Hook & Script Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-          {filteredHooks.map((item) => {
-            const isExpanded = expandedHookId === item.id;
-            const isCopiedHook = copiedHookId === item.id;
-            const isCopiedScript = copiedScriptId === item.id;
-
-            return (
-              <div
-                key={item.id}
-                className={`rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden ${
-                  isExpanded
-                    ? "bg-paper/90 border-gold/50 shadow-lg shadow-gold/5 ring-1 ring-gold/20"
-                    : "bg-paper/50 hover:bg-paper/80 border-line hover:border-gold/35"
-                }`}
-              >
-                <div className="p-5 space-y-3.5 flex-1">
-                  {/* Badges & Meta Row */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-gold/10 text-gold border border-gold/25">
-                        {item.badge}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-panel border border-line text-muted">
-                        {item.niche}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 flex items-center gap-1">
-                      <Eye size={10} /> {item.blueprint.estimatedRetention}
-                    </span>
-                  </div>
-
-                  {/* The Primary Hook Line */}
-                  <div className="relative">
-                    <p className="text-sm sm:text-base font-semibold text-ink leading-snug font-sans tracking-tight">
-                      &ldquo;{item.hook}&rdquo;
-                    </p>
-                  </div>
-
-                  {/* Retention & Audio Cues */}
-                  <div className="space-y-2 pt-1">
-                    <div className="p-2.5 rounded-xl bg-panel/60 border border-line/60 flex items-start gap-2 text-xs">
-                      <Zap size={14} className="text-amber-400 shrink-0 mt-0.5" />
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider block">
-                          3-Sec Retention Trigger
-                        </span>
-                        <p className="text-ink/90 text-xs">{item.retentionHack}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-[11px] font-mono text-muted px-1">
-                      <Volume2 size={12} className="text-gold shrink-0" />
-                      <span className="truncate">Audio Cue: {item.soundStyle}</span>
-                    </div>
-                  </div>
-
-                  {/* Expanded 30-Sec Script Blueprint Drawer */}
-                  {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-gold/20 space-y-3.5 animate-fade-in bg-panel/40 p-4 rounded-xl border border-line">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-gold uppercase tracking-wider flex items-center gap-1.5">
-                          <Play size={12} className="text-gold fill-gold" />
-                          <span>Full 30-Sec Storyboard</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-muted">Director Cut</span>
-                      </div>
-
-                      <div className="space-y-2.5 text-xs">
-                        <div className="p-2.5 rounded-lg bg-paper border border-line">
-                          <span className="font-mono font-bold text-muted text-[10px] block mb-1">
-                            ⏱️ 0:00 - 0:03 [Visual & Audio Action]
-                          </span>
-                          <p className="text-ink font-medium">{item.blueprint.visualAction}</p>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-paper border border-line">
-                          <span className="font-mono font-bold text-muted text-[10px] block mb-1">
-                            ⚡ 0:03 - 0:18 [Value Bridge]
-                          </span>
-                          <p className="text-ink">{item.blueprint.bodyDelivery}</p>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-paper border border-line">
-                          <span className="font-mono font-bold text-muted text-[10px] block mb-1">
-                            🎯 0:18 - 0:30 [Call To Action]
-                          </span>
-                          <p className="text-gold font-semibold">{item.blueprint.ctaAngle}</p>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300">
-                          <span className="font-mono font-bold text-[10px] block mb-1">
-                            🎥 Pro Production Tip
-                          </span>
-                          <p className="text-xs text-amber-200">{item.blueprint.directorTip}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Bottom Actions */}
-                <div className="p-4 bg-paper/80 border-t border-line flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => setExpandedHookId(isExpanded ? null : item.id)}
-                    className="text-xs font-mono text-muted hover:text-gold flex items-center gap-1 transition-colors"
-                  >
-                    <span>{isExpanded ? "Hide Blueprint" : "View 30s Script"}</span>
-                    {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {/* Copy Hook Only */}
-                    <button
-                      onClick={() => handleCopyHookOnly(item.id, item.hook)}
-                      className="px-2.5 py-1.5 rounded-lg bg-panel hover:bg-paper text-ink text-xs font-mono border border-line hover:border-gold/40 flex items-center gap-1.5 transition-all"
-                      title="Copy 3-second hook"
-                    >
-                      {isCopiedHook ? (
-                        <>
-                          <Check size={12} className="text-emerald-500" />
-                          <span className="text-emerald-500 font-bold">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} />
-                          <span>Hook</span>
-                        </>
-                      )}
-                    </button>
-
-                    {/* Copy Full Script */}
-                    <button
-                      onClick={() => handleCopyFullScript(item.id, item)}
-                      className="px-3 py-1.5 rounded-lg bg-gold hover:bg-gold/90 text-paper font-semibold text-xs font-mono flex items-center gap-1.5 transition-all shadow-sm"
-                      title="Copy full 30s production script"
-                    >
-                      {isCopiedScript ? (
-                        <>
-                          <Check size={12} className="text-paper" />
-                          <span>Script Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Clapperboard size={12} />
-                          <span>Copy Script</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
+          {/* Studio Top Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 mb-6 pb-5 border-b border-line">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold/25 via-amber-500/15 to-transparent border border-gold/40 text-gold flex items-center justify-center shrink-0 shadow-md">
+                <Clapperboard size={22} className="text-gold animate-subtle-float" />
               </div>
-            );
-          })}
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-display font-bold text-lg text-ink tracking-tight">
+                    {title}
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-mono font-bold border border-gold/30 uppercase tracking-wide">
+                    2026 Production Blueprints
+                  </span>
+                </div>
+                <p className="text-xs text-muted mt-0.5">
+                  High-retention 3-second openers, camera shot-lists, and conversion script angles.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <button
+                onClick={() => setShuffleSeed((s) => s + 1)}
+                className="px-3.5 py-2 rounded-xl bg-paper hover:bg-paper/80 text-ink hover:text-gold text-xs font-mono font-medium flex items-center gap-2 border border-line hover:border-gold/40 transition-all shadow-sm"
+                title="Rotate fresh set of viral frameworks"
+              >
+                <RefreshCw size={13} className={shuffleSeed ? "animate-spin-once text-gold" : "text-muted"} />
+                <span>Rotate Angles</span>
+              </button>
+
+              {collapsible && (
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="px-3 py-2 rounded-xl bg-paper/60 hover:bg-paper text-muted hover:text-ink text-xs font-mono flex items-center gap-1.5 border border-line transition-colors"
+                  title="Minimize studio to save space"
+                >
+                  <span>Minimize</span>
+                  <ChevronUp size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Dual Filter Controls: Vibes & Niches */}
+          <div className="space-y-3 mb-6 relative z-10">
+            {/* Vibe Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {[
+                { id: "ALL", label: "✨ All Frameworks" },
+                { id: "POV", label: "🎬 POV Angles" },
+                { id: "VIRAL_OPENER", label: "⚡ 3-Sec Hooks" },
+                { id: "SECRET_SAUCE", label: "🤫 Secret Sauce" },
+                { id: "CONTROVERSIAL", label: "💥 Hot Takes" },
+                { id: "STORYTIME", label: "📖 Storytime Spikes" },
+                { id: "CTA_HACK", label: "🎯 High-Converting CTAs" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedVibe(tab.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 ${
+                    selectedVibe === tab.id
+                      ? "bg-gold text-paper font-semibold shadow-md shadow-gold/10"
+                      : "bg-paper/60 hover:bg-paper text-muted hover:text-ink border border-line"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Niche Selector Filter */}
+            <div className="flex items-center gap-2 text-xs font-mono text-muted flex-wrap pt-1">
+              <span className="flex items-center gap-1 text-gold">
+                <SlidersHorizontal size={11} /> Niche:
+              </span>
+              {["ALL", "Tech & AI", "Lifestyle & Beauty", "Finance & Wealth", "Fitness & Health", "Content & Growth"].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setSelectedNiche(n)}
+                  className={`px-2 py-0.5 rounded-md text-[11px] transition-colors ${
+                    selectedNiche === n
+                      ? "bg-gold/15 text-gold font-bold border border-gold/30"
+                      : "hover:text-ink text-muted"
+                  }`}
+                >
+                  {n === "ALL" ? "All Niches" : n}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Dynamic Hook & Script Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+            {filteredHooks.map((item) => {
+              const isExpanded = expandedHookId === item.id;
+              const isCopiedHook = copiedHookId === item.id;
+              const isCopiedScript = copiedScriptId === item.id;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                    isExpanded
+                      ? "bg-paper/90 border-gold/50 shadow-lg shadow-gold/5 ring-1 ring-gold/20"
+                      : "bg-paper/50 hover:bg-paper/80 border-line hover:border-gold/35"
+                  }`}
+                >
+                  <div className="p-5 space-y-3.5 flex-1">
+                    {/* Badges & Meta Row */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-gold/10 text-gold border border-gold/25">
+                          {item.badge}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-panel border border-line text-muted">
+                          {item.niche}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 flex items-center gap-1">
+                        <Eye size={10} /> {item.blueprint.estimatedRetention}
+                      </span>
+                    </div>
+
+                    {/* The Primary Hook Line */}
+                    <div className="relative">
+                      <p className="text-sm sm:text-base font-semibold text-ink leading-snug font-sans tracking-tight">
+                        &ldquo;{item.hook}&rdquo;
+                      </p>
+                    </div>
+
+                    {/* Retention & Audio Cues */}
+                    <div className="space-y-2 pt-1">
+                      <div className="p-2.5 rounded-xl bg-panel/60 border border-line/60 flex items-start gap-2 text-xs">
+                        <Zap size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider block">
+                            3-Sec Retention Trigger
+                          </span>
+                          <p className="text-ink/90 text-xs">{item.retentionHack}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[11px] font-mono text-muted px-1">
+                        <Volume2 size={12} className="text-gold shrink-0" />
+                        <span className="truncate">Audio Cue: {item.soundStyle}</span>
+                      </div>
+                    </div>
+
+                    {/* Expanded 30-Sec Script Blueprint Drawer */}
+                    {isExpanded && (
+                      <div className="mt-4 pt-4 border-t border-gold/20 space-y-3.5 animate-fade-in bg-panel/40 p-4 rounded-xl border border-line">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-gold uppercase tracking-wider flex items-center gap-1.5">
+                            <Play size={12} className="text-gold fill-gold" />
+                            <span>Full 30-Sec Storyboard</span>
+                          </span>
+                          <span className="text-[10px] font-mono text-muted">Director Cut</span>
+                        </div>
+
+                        <div className="space-y-2.5 text-xs">
+                          <div className="p-2.5 rounded-lg bg-paper border border-line">
+                            <span className="font-mono font-bold text-muted text-[10px] block mb-1">
+                              ⏱️ 0:00 - 0:03 [Visual & Audio Action]
+                            </span>
+                            <p className="text-ink font-medium">{item.blueprint.visualAction}</p>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-paper border border-line">
+                            <span className="font-mono font-bold text-muted text-[10px] block mb-1">
+                              ⚡ 0:03 - 0:18 [Value Bridge]
+                            </span>
+                            <p className="text-ink">{item.blueprint.bodyDelivery}</p>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-paper border border-line">
+                            <span className="font-mono font-bold text-muted text-[10px] block mb-1">
+                              🎯 0:18 - 0:30 [Call To Action]
+                            </span>
+                            <p className="text-gold font-semibold">{item.blueprint.ctaAngle}</p>
+                          </div>
+
+                          <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300">
+                            <span className="font-mono font-bold text-[10px] block mb-1">
+                              🎥 Pro Production Tip
+                            </span>
+                            <p className="text-xs text-amber-200">{item.blueprint.directorTip}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Bottom Actions */}
+                  <div className="p-4 bg-paper/80 border-t border-line flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => setExpandedHookId(isExpanded ? null : item.id)}
+                      className="text-xs font-mono text-muted hover:text-gold flex items-center gap-1 transition-colors"
+                    >
+                      <span>{isExpanded ? "Hide Blueprint" : "View 30s Script"}</span>
+                      {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {/* Copy Hook Only */}
+                      <button
+                        onClick={() => handleCopyHookOnly(item.id, item.hook)}
+                        className="px-2.5 py-1.5 rounded-lg bg-panel hover:bg-paper text-ink text-xs font-mono border border-line hover:border-gold/40 flex items-center gap-1.5 transition-all"
+                        title="Copy 3-second hook"
+                      >
+                        {isCopiedHook ? (
+                          <>
+                            <Check size={12} className="text-emerald-500" />
+                            <span className="text-emerald-500 font-bold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} />
+                            <span>Hook</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Copy Full Script */}
+                      <button
+                        onClick={() => handleCopyFullScript(item.id, item)}
+                        className="px-3 py-1.5 rounded-lg bg-gold hover:bg-gold/90 text-paper font-semibold text-xs font-mono flex items-center gap-1.5 transition-all shadow-sm"
+                        title="Copy full 30s production script"
+                      >
+                        {isCopiedScript ? (
+                          <>
+                            <Check size={12} className="text-paper" />
+                            <span>Script Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clapperboard size={12} />
+                            <span>Copy Script</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

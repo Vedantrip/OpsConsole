@@ -4,6 +4,7 @@ import CreatorForm from "./creator-form";
 import CreatorRow from "./creator-row";
 import { requireAccess } from "@/lib/require-access";
 import { requireContext, creatorScope } from "@/lib/access";
+import CreatorVibeStudio from "@/components/content/creator-vibe-studio";
 
 export default async function CreatorsPage({
   searchParams,
@@ -89,6 +90,18 @@ export default async function CreatorsPage({
           </div>
         </div>
       </div>
+
+      {/* Optional Creator Viral Hook & Script Studio */}
+      <section>
+        <CreatorVibeStudio
+          activeRosterCount={totalCount}
+          verifiedCount={igCount}
+          collapsible={true}
+          defaultOpen={false}
+          hideMomentumBanner={true}
+          title="Viral Hook & Script Studio (Creative Roster Blueprints)"
+        />
+      </section>
 
       <div className="card p-5 space-y-3">
         <div>

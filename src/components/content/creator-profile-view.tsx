@@ -9,6 +9,7 @@ import CrossAnalysisMatrix from "../demographics/cross-analysis-matrix";
 import PostDemographicsModal from "../demographics/post-demographics-modal";
 import PostFormModal from "./post-form-modal";
 import AITrendingHub from "./ai-trending-hub";
+import CreatorVibeStudio from "./creator-vibe-studio";
 import {
   Layers,
   Sparkles,
@@ -28,6 +29,7 @@ import {
   Award,
   Link2,
   Flame,
+  Clapperboard,
 } from "lucide-react";
 import { getOrCreateConnectToken, sendPortalInviteEmailAction } from "@/app/creators/[id]/actions";
 
@@ -65,7 +67,7 @@ export default function CreatorProfileView({
   computedInsights,
   existingTags,
 }: CreatorProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<"content" | "insights" | "demographics" | "audit" | "trends">("content");
+  const [activeTab, setActiveTab] = useState<"content" | "insights" | "demographics" | "audit" | "trends" | "hooks">("content");
   const [selectedPostForDemo, setSelectedPostForDemo] = useState<PostWithRelations | null>(null);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -407,6 +409,21 @@ export default function CreatorProfileView({
               HOT
             </span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("hooks")}
+            className={`flex items-center gap-2 py-3 px-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === "hooks"
+                ? "border-gold text-ink font-semibold"
+                : "border-transparent text-muted hover:text-ink"
+            }`}
+          >
+            <Clapperboard size={14} className="text-gold" />
+            <span>Viral Hooks & Scripts</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-gold/10 border border-gold/30 text-gold font-bold">
+              NEW
+            </span>
+          </button>
         </div>
 
         <button
@@ -522,6 +539,20 @@ export default function CreatorProfileView({
           <AITrendingHub
             creatorId={creator.id}
             creatorName={creator.name}
+          />
+        </div>
+      )}
+
+      {/* Tab 6: Viral Hooks & Scripts Studio */}
+      {activeTab === "hooks" && (
+        <div className="space-y-6">
+          <CreatorVibeStudio
+            averageScore={creator.mountliftScore}
+            activeRosterCount={1}
+            verifiedCount={isConnected ? 1 : 0}
+            hideMomentumBanner={true}
+            title={`Viral Hook & Script Studio · Curated for ${creator.name}`}
+            collapsible={false}
           />
         </div>
       )}

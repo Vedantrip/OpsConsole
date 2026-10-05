@@ -220,13 +220,15 @@ export default async function CreatorManagerDashboard() {
         </div>
       </div>
 
-      {/* Interactive Gen-Z Vibe Studio (Hook Generator + Audio Radar) */}
+      {/* Interactive Gen-Z Vibe Studio (Collapsible to save dashboard space) */}
       <section>
         <CreatorVibeStudio
           averageScore={averageScore}
           activeRosterCount={creators.length}
           verifiedCount={igReady}
           openDeliverablesCount={openDeliverables}
+          collapsible={true}
+          defaultOpen={false}
         />
       </section>
 
